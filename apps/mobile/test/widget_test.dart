@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ishara/data/mock_sign_repository.dart';
 import 'package:ishara/main.dart';
 
 void main() {
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await MockSignRepository.ensureLoaded();
+  });
+
   testWidgets('home screen shows Ishara and search', (WidgetTester tester) async {
     await tester.pumpWidget(const IsharaApp());
 

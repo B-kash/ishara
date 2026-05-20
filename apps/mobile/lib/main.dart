@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'data/mock_sign_repository.dart';
 import 'screens/home_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await MockSignRepository.ensureLoaded();
   runApp(const IsharaApp());
 }
 

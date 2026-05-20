@@ -2,9 +2,11 @@
   "name": "ishara",
   "private": true,
   "scripts": {
+    "sync-mock-data": "node scripts/sync-mock-data.mjs",
     "api:dev": "npm run dev --workspace=@ishara/api",
     "api:build": "npm run build --workspace=@ishara/api",
-    "api:start": "npm run start --workspace=@ishara/api"
+    "api:start": "npm run start --workspace=@ishara/api",
+    "postinstall": "node scripts/sync-mock-data.mjs"
   },
   "workspaces": [
     "apps/api"

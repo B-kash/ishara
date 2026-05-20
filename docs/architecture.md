@@ -22,6 +22,10 @@ User searches word
 - Sign
 - Category
 
+## Mock data (MVP)
+
+Shared sign records live in `data/mock-signs.json`. The API reads this file directly; the Flutter app uses a copy synced to `apps/mobile/assets/data/mock-signs.json` via `npm run sync-mock-data`.
+
 ## MVP API
 
 - GET /health

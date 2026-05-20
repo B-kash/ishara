@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/mock_signs.dart';
+import '../data/mock_sign_repository.dart';
 import '../models/sign.dart';
 import 'sign_detail_screen.dart';
 

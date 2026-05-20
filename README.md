@@ -18,10 +18,14 @@ English/Nepali word → concept → Nepali Sign Language sign video.
 apps/
   mobile/   # Flutter app (Android, iOS, Web)
   api/      # Dictionary API
+data/
+  mock-signs.json   # shared mock dictionary (single source)
 docs/
   product.md
   architecture.md
 ```
+
+After editing `data/mock-signs.json`, run `npm run sync-mock-data` so the Flutter asset stays in sync (also runs on `npm install`).
 
 ## Prerequisites
 
