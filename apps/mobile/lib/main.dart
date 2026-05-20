@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 
-import 'data/mock_sign_repository.dart';
+import 'api/sign_api_client.dart';
 import 'screens/home_screen.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await MockSignRepository.ensureLoaded();
-  runApp(const IsharaApp());
+void main() {
+  runApp(
+    IsharaApp(
+      signApiClient: SignApiClient(),
+    ),
+  );
 }
 
 class IsharaApp extends StatelessWidget {
-  const IsharaApp({super.key});
+  const IsharaApp({required this.signApiClient, super.key});
+
+  final SignApiClient signApiClient;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +24,7 @@ class IsharaApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: HomeScreen(signApiClient: signApiClient),
     );
   }
 }

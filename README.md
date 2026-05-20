@@ -25,7 +25,7 @@ docs/
   architecture.md
 ```
 
-After editing `data/mock-signs.json`, run `npm run sync-mock-data` so the Flutter asset stays in sync (also runs on `npm install`).
+Mock dictionary data for the API lives in `data/mock-signs.json`.
 
 ## Prerequisites
 
@@ -45,8 +45,10 @@ npm install
 Start the API in watch mode:
 
 ```bash
-npm run api:dev
+npm run dev
 ```
+
+(`npm run api:dev` is the same command.)
 
 The server listens on `http://127.0.0.1:3000` by default. Override with `PORT` and `HOST` if needed.
 
@@ -113,21 +115,28 @@ npm run api:start   # run compiled server
 
 ### Mobile app
 
+Start the API first, then run the app:
+
 ```bash
 cd apps/mobile
 flutter pub get
+flutter run -d chrome
 ```
 
-Run on a connected device or emulator:
+The app calls `http://127.0.0.1:3000` by default. Override with:
 
 ```bash
-flutter run
+flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:3000
 ```
 
-Examples by platform:
+Examples:
+
+- Search `mother` (English) → `GET /signs/search?q=mother&lang=en`
+- Search `आमा` (Nepali) → `GET /signs/search?q=आमा&lang=ne`
+
+Other platforms:
 
 ```bash
-flutter run -d chrome    # Web
 flutter run -d android   # Android
 flutter run -d ios       # iOS (macOS with Xcode)
 ```

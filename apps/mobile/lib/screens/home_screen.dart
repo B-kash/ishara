@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../data/mock_sign_repository.dart';
-import '../models/sign.dart';
+import '../api/sign_api_client.dart';
+import '../data/category_labels.dart';
+import '../models/search_language.dart';
 import 'search_results_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({required this.signApiClient, super.key});
+
+  final SignApiClient signApiClient;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -30,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => SearchResultsScreen(
+          signApiClient: widget.signApiClient,
           query: query,
           language: _language,
           category: _selectedCategory,
@@ -113,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                   },
                 ),
-                for (final category in mockCategories)
+                for (final category in categoryLabels)
                   FilterChip(
                     label: Text(category),
                     selected: _selectedCategory == category,

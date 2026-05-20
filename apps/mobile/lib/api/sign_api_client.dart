@@ -1,0 +1,71 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../config/api_config.dart';
+import '../models/search_language.dart';
+import '../models/sign.dart';
+
+class SignApiException implements Exception {
+  SignApiException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+class SignApiClient {
+  SignApiClient({
+    String? baseUrl,
+    http.Client? httpClient,
+  })  : baseUrl = baseUrl ?? ApiConfig.baseUrl,
+        httpClient = httpClient ?? http.Client();
+
+  final String baseUrl;
+  final http.Client httpClient;
+
+  Future<List<Sign>> searchSigns({
+    required String query,
+    required SearchLanguage language,
+  }) async {
+    final languageCode = language.apiCode;
+    final uri = Uri.parse('$baseUrl/signs/search').replace(
+      queryParameters: {
+        'q': query,
+        'lang': languageCode,
+      },
+    );
+
+    final response = await httpClient.get(uri);
+
+    if (response.statusCode != 200) {
+      throw SignApiException(
+        'Search failed (${response.statusCode}). Is the API running?',
+      );
+    }
+
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    final results = body['results'] as List<dynamic>;
+    return results
+        .map((entry) => Sign.fromJson(entry as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<Sign> getSignById(String signId) async {
+    final uri = Uri.parse('$baseUrl/signs/$signId');
+    final response = await httpClient.get(uri);
+
+    if (response.statusCode == 404) {
+      throw SignApiException('Sign not found');
+    }
+    if (response.statusCode != 200) {
+      throw SignApiException(
+        'Could not load sign (${response.statusCode}). Is the API running?',
+      );
+    }
+
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    return Sign.fromJson(body);
+  }
+}

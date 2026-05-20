@@ -24,7 +24,7 @@ User searches word
 
 ## Mock data (MVP)
 
-Shared sign records live in `data/mock-signs.json`. The API reads this file directly; the Flutter app uses a copy synced to `apps/mobile/assets/data/mock-signs.json` via `npm run sync-mock-data`.
+Sign records live in `data/mock-signs.json`. The API reads this file in memory. The Flutter app loads signs over HTTP from the API.
 
 ## MVP API
 
