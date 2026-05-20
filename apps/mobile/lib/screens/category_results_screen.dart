@@ -5,23 +5,25 @@ import '../models/search_language.dart';
 import '../models/sign_search_result.dart';
 import 'sign_detail_screen.dart';
 
-class SearchResultsScreen extends StatefulWidget {
-  const SearchResultsScreen({
+class CategoryResultsScreen extends StatefulWidget {
+  const CategoryResultsScreen({
     super.key,
     required this.signApiClient,
-    required this.query,
+    required this.categoryId,
+    required this.categoryName,
     required this.language,
   });
 
   final SignApiClient signApiClient;
-  final String query;
+  final String categoryId;
+  final String categoryName;
   final SearchLanguage language;
 
   @override
-  State<SearchResultsScreen> createState() => _SearchResultsScreenState();
+  State<CategoryResultsScreen> createState() => _CategoryResultsScreenState();
 }
 
-class _SearchResultsScreenState extends State<SearchResultsScreen> {
+class _CategoryResultsScreenState extends State<CategoryResultsScreen> {
   late Future<List<SignSearchResult>> _resultsFuture;
 
   @override
@@ -31,13 +33,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   Future<List<SignSearchResult>> _loadResults() {
-    return widget.signApiClient.searchSigns(
-      query: widget.query,
+    return widget.signApiClient.getSignsByCategory(
+      categoryId: widget.categoryId,
       language: widget.language,
     );
   }
 
-  void _retrySearch() {
+  void _retryLoad() {
     setState(() {
       _resultsFuture = _loadResults();
     });
@@ -47,7 +49,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Results for "${widget.query}"'),
+        title: Text(widget.categoryName),
       ),
       body: FutureBuilder<List<SignSearchResult>>(
         future: _resultsFuture,
@@ -81,7 +83,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                     ),
                     const SizedBox(height: 16),
                     FilledButton(
-                      onPressed: _retrySearch,
+                      onPressed: _retryLoad,
                       child: const Text('Try again'),
                     ),
                   ],
@@ -97,7 +99,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text(
-                  'No signs found. Try another word or category.',
+                  'No signs in this category yet.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),

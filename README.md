@@ -92,6 +92,18 @@ Example search response:
 }
 ```
 
+List categories:
+
+```bash
+curl http://127.0.0.1:3000/categories
+```
+
+Browse signs in a category:
+
+```bash
+curl "http://127.0.0.1:3000/categories/family/signs?lang=en"
+```
+
 Get one sign by id:
 
 ```bash

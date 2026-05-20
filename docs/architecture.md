@@ -31,6 +31,7 @@ Sign records live in `data/mock-signs.json`. The API reads this file in memory. 
 - GET /health
 - GET /signs/search?q=&lang= → `{ items: SignSearchResult[] }`
 - GET /signs/:id → `SignDetail`
-- GET /categories (later)
+- GET /categories → `{ items: Category[] }`
+- GET /categories/:id/signs?lang= → `{ items: SignSearchResult[] }`
 
 Search and detail responses use typed contracts in `apps/api/src/types/api-responses.ts`.

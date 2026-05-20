@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../api/sign_api_client.dart';
-import '../data/category_labels.dart';
+import '../models/category.dart';
 import '../models/search_language.dart';
+import 'category_results_screen.dart';
 import 'search_results_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,12 +18,24 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _searchController = TextEditingController();
   SearchLanguage _language = SearchLanguage.english;
-  String? _selectedCategory;
+  late Future<List<Category>> _categoriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoriesFuture = widget.signApiClient.getCategories();
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _reloadCategories() {
+    setState(() {
+      _categoriesFuture = widget.signApiClient.getCategories();
+    });
   }
 
   void _submitSearch() {
@@ -36,7 +49,19 @@ class _HomeScreenState extends State<HomeScreen> {
           signApiClient: widget.signApiClient,
           query: query,
           language: _language,
-          category: _selectedCategory,
+        ),
+      ),
+    );
+  }
+
+  void _openCategory(Category category) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => CategoryResultsScreen(
+          signApiClient: widget.signApiClient,
+          categoryId: category.id,
+          categoryName: category.name,
+          language: _language,
         ),
       ),
     );
@@ -104,30 +129,51 @@ class _HomeScreenState extends State<HomeScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilterChip(
-                  label: const Text('All'),
-                  selected: _selectedCategory == null,
-                  onSelected: (isSelected) {
-                    if (isSelected) {
-                      setState(() => _selectedCategory = null);
-                    }
-                  },
-                ),
-                for (final category in categoryLabels)
-                  FilterChip(
-                    label: Text(category),
-                    selected: _selectedCategory == category,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedCategory = selected ? category : null;
-                      });
-                    },
-                  ),
-              ],
+            FutureBuilder<List<Category>>(
+              future: _categoriesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: LinearProgressIndicator(),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Could not load categories',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: _reloadCategories,
+                        child: const Text('Try again'),
+                      ),
+                    ],
+                  );
+                }
+
+                final categories = snapshot.data ?? [];
+
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final category in categories)
+                      ActionChip(
+                        label: Text(category.name),
+                        onPressed: () => _openCategory(category),
+                      ),
+                  ],
+                );
+              },
             ),
           ],
         ),

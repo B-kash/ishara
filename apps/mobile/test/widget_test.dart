@@ -20,16 +20,27 @@ void main() {
     final signApiClient = SignApiClient(
       baseUrl: 'http://test',
       httpClient: MockClient((request) async {
+        if (request.url.path == '/categories') {
+          return utf8JsonResponse(
+            jsonEncode({
+              'items': [
+                {'id': 'greetings', 'name': 'Greetings'},
+              ],
+            }),
+          );
+        }
         return utf8JsonResponse('{"items":[]}');
       }),
     );
 
     await tester.pumpWidget(IsharaApp(signApiClient: signApiClient));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Ishara'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
     expect(find.text('English'), findsOneWidget);
-    expect(find.text('Nepali'), findsOneWidget);
+    expect(find.text('Greetings'), findsOneWidget);
   });
 
   testWidgets('search navigates to API results', (WidgetTester tester) async {
@@ -51,11 +62,16 @@ void main() {
             }),
           );
         }
+        if (request.url.path == '/categories') {
+          return utf8JsonResponse('{"items":[]}');
+        }
         return http.Response('Not found', 404);
       }),
     );
 
     await tester.pumpWidget(IsharaApp(signApiClient: signApiClient));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     await tester.enterText(find.byType(TextField), 'hello');
     await tester.tap(find.byIcon(Icons.arrow_forward));
