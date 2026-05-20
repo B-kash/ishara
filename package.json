@@ -1,0 +1,12 @@
+{
+  "name": "ishara",
+  "private": true,
+  "scripts": {
+    "api:dev": "npm run dev --workspace=@ishara/api",
+    "api:build": "npm run build --workspace=@ishara/api",
+    "api:start": "npm run start --workspace=@ishara/api"
+  },
+  "workspaces": [
+    "apps/api"
+  ]
+}

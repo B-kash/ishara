@@ -30,6 +30,24 @@ build/
 .npm
 *.tsbuildinfo
 
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/android/local.properties
+**/android/.gradle/
+**/android/captures/
+**/android/**/gradle-wrapper.jar
+**/android/gradlew
+**/android/gradlew.bat
+*.iml
+.idea/
+
 # Python
 __pycache__/
 *.py[cod]
