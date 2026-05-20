@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import { signRoutes } from "./routes/signs.js";
 
 const port = Number(process.env.PORT ?? 3000);
 const host = process.env.HOST ?? "0.0.0.0";
@@ -9,9 +10,11 @@ app.get("/health", async () => {
   return { status: "ok" };
 });
 
+await app.register(signRoutes);
+
 try {
   await app.listen({ port, host });
-} catch (err) {
-  app.log.error(err);
+} catch (error) {
+  app.log.error(error);
   process.exit(1);
 }

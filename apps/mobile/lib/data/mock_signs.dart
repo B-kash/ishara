@@ -68,7 +68,7 @@ const mockSigns = <Sign>[
 ];
 
 List<String> get mockCategories {
-  return mockSigns.map((s) => s.category).toSet().toList()..sort();
+  return mockSigns.map((sign) => sign.category).toSet().toList()..sort();
 }
 
 List<Sign> searchSigns({
@@ -76,8 +76,8 @@ List<Sign> searchSigns({
   required SearchLanguage language,
   String? category,
 }) {
-  final trimmed = query.trim().toLowerCase();
-  if (trimmed.isEmpty) {
+  final normalizedQuery = query.trim().toLowerCase();
+  if (normalizedQuery.isEmpty) {
     return [];
   }
 
@@ -85,9 +85,9 @@ List<Sign> searchSigns({
     if (category != null && sign.category != category) {
       return false;
     }
-    final haystack = language == SearchLanguage.english
+    final wordText = language == SearchLanguage.english
         ? sign.englishWord.toLowerCase()
         : sign.nepaliWord.toLowerCase();
-    return haystack.contains(trimmed);
+    return wordText.contains(normalizedQuery);
   }).toList();
 }

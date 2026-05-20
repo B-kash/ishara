@@ -58,6 +58,48 @@ Expected response:
 {"status":"ok"}
 ```
 
+Search signs (English):
+
+```bash
+curl "http://127.0.0.1:3000/signs/search?q=hello&lang=en"
+```
+
+Search signs (Nepali):
+
+```bash
+curl "http://127.0.0.1:3000/signs/search?q=%E0%A4%A8%E0%A4%AE%E0%A4%B8%E0%A5%8D%E0%A4%A4%E0%A5%87&lang=ne"
+```
+
+Example search response:
+
+```json
+{
+  "query": "hello",
+  "lang": "en",
+  "count": 1,
+  "results": [
+    {
+      "id": "hello",
+      "conceptId": "concept-hello",
+      "englishWord": "Hello",
+      "nepaliWord": "नमस्ते",
+      "meaningEnglish": "A greeting used when meeting someone.",
+      "meaningNepali": "कसैलाई भेट्दा प्रयोग गरिने अभिवादन।",
+      "category": "Greetings",
+      "videoUrl": null
+    }
+  ]
+}
+```
+
+Get one sign by id:
+
+```bash
+curl http://127.0.0.1:3000/signs/hello
+```
+
+`lang` accepts `en`, `english`, `ne`, or `nepali`. Responses are JSON metadata only (no video files).
+
 Other scripts:
 
 ```bash

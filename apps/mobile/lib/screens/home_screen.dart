@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 border: const OutlineInputBorder(),
               ),
               textInputAction: TextInputAction.search,
-              onSubmitted: (_) => _submitSearch(),
+              onSubmitted: (value) => _submitSearch(),
             ),
             const SizedBox(height: 16),
             SegmentedButton<SearchLanguage>(
@@ -107,8 +107,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 FilterChip(
                   label: const Text('All'),
                   selected: _selectedCategory == null,
-                  onSelected: (_) {
-                    setState(() => _selectedCategory = null);
+                  onSelected: (isSelected) {
+                    if (isSelected) {
+                      setState(() => _selectedCategory = null);
+                    }
                   },
                 ),
                 for (final category in mockCategories)
