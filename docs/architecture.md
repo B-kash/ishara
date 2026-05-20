@@ -29,6 +29,8 @@ Sign records live in `data/mock-signs.json`. The API reads this file in memory. 
 ## MVP API
 
 - GET /health
-- GET /signs/search?q=&lang=
-- GET /signs/:id
-- GET /categories
+- GET /signs/search?q=&lang= → `{ items: SignSearchResult[] }`
+- GET /signs/:id → `SignDetail`
+- GET /categories (later)
+
+Search and detail responses use typed contracts in `apps/api/src/types/api-responses.ts`.

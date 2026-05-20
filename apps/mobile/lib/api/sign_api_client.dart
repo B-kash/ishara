@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
 import '../models/search_language.dart';
-import '../models/sign.dart';
+import '../models/sign_detail.dart';
+import '../models/sign_search_result.dart';
 
 class SignApiException implements Exception {
   SignApiException(this.message);
@@ -25,7 +26,7 @@ class SignApiClient {
   final String baseUrl;
   final http.Client httpClient;
 
-  Future<List<Sign>> searchSigns({
+  Future<List<SignSearchResult>> searchSigns({
     required String query,
     required SearchLanguage language,
   }) async {
@@ -46,13 +47,16 @@ class SignApiClient {
     }
 
     final body = jsonDecode(response.body) as Map<String, dynamic>;
-    final results = body['results'] as List<dynamic>;
-    return results
-        .map((entry) => Sign.fromJson(entry as Map<String, dynamic>))
+    final items = body['items'] as List<dynamic>;
+    return items
+        .map(
+          (entry) =>
+              SignSearchResult.fromJson(entry as Map<String, dynamic>),
+        )
         .toList();
   }
 
-  Future<Sign> getSignById(String signId) async {
+  Future<SignDetail> getSignById(String signId) async {
     final uri = Uri.parse('$baseUrl/signs/$signId');
     final response = await httpClient.get(uri);
 
@@ -66,6 +70,6 @@ class SignApiClient {
     }
 
     final body = jsonDecode(response.body) as Map<String, dynamic>;
-    return Sign.fromJson(body);
+    return SignDetail.fromJson(body);
   }
 }

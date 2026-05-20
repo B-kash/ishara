@@ -4,6 +4,8 @@ import {
   parseSearchLanguage,
   searchSignRecords,
 } from "../data/sign-search.js";
+import { toSignDetail, toSignSearchResult } from "../mappers/sign-response.js";
+import type { ApiErrorResponse } from "../types/api-responses.js";
 
 interface SignRouteParams {
   id: string;
@@ -25,36 +27,37 @@ export async function signRoutes(server: FastifyInstance) {
     const languageParam = getLanguageParam(request);
 
     if (!searchQuery?.trim()) {
-      return reply
-        .status(400)
-        .send({ error: "Query parameter q is required" });
+      const errorBody: ApiErrorResponse = {
+        error: "Query parameter q is required",
+      };
+      return reply.status(400).send(errorBody);
     }
 
     const searchLanguage = parseSearchLanguage(languageParam);
     if (!searchLanguage) {
-      return reply.status(400).send({
+      const errorBody: ApiErrorResponse = {
         error: "Query parameter lang must be en or ne",
-      });
+      };
+      return reply.status(400).send(errorBody);
     }
 
-    const results = searchSignRecords(searchQuery, searchLanguage);
+    const matchedRecords = searchSignRecords(searchQuery, searchLanguage);
+    const items = matchedRecords.map((signRecord) =>
+      toSignSearchResult(signRecord, searchLanguage),
+    );
 
-    return {
-      query: searchQuery,
-      lang: searchLanguage,
-      count: results.length,
-      results,
-    };
+    return { items };
   });
 
   server.get("/signs/:id", async (request, reply) => {
     const { id: signId } = request.params as SignRouteParams;
-    const sign = getSignById(signId);
+    const signRecord = getSignById(signId);
 
-    if (!sign) {
-      return reply.status(404).send({ error: "Sign not found" });
+    if (!signRecord) {
+      const errorBody: ApiErrorResponse = { error: "Sign not found" };
+      return reply.status(404).send(errorBody);
     }
 
-    return sign;
+    return toSignDetail(signRecord);
   });
 }

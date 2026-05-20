@@ -80,19 +80,13 @@ Example search response:
 
 ```json
 {
-  "query": "hello",
-  "lang": "en",
-  "count": 1,
-  "results": [
+  "items": [
     {
       "id": "hello",
-      "conceptId": "concept-hello",
-      "englishWord": "Hello",
+      "englishWord": "hello",
       "nepaliWord": "नमस्ते",
-      "meaningEnglish": "A greeting used when meeting someone.",
-      "meaningNepali": "कसैलाई भेट्दा प्रयोग गरिने अभिवादन।",
       "category": "Greetings",
-      "videoUrl": null
+      "meaning": "A greeting used when meeting someone."
     }
   ]
 }
@@ -102,6 +96,20 @@ Get one sign by id:
 
 ```bash
 curl http://127.0.0.1:3000/signs/hello
+```
+
+Example detail response:
+
+```json
+{
+  "id": "hello",
+  "englishWord": "hello",
+  "nepaliWord": "नमस्ते",
+  "category": "Greetings",
+  "meaning": "A greeting used when meeting someone.",
+  "videoUrl": null,
+  "thumbnailUrl": null
+}
 ```
 
 `lang` accepts `en`, `english`, `ne`, or `nepali`. Responses are JSON metadata only (no video files).

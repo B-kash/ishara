@@ -20,7 +20,7 @@ void main() {
     final signApiClient = SignApiClient(
       baseUrl: 'http://test',
       httpClient: MockClient((request) async {
-        return utf8JsonResponse('{"results":[]}');
+        return utf8JsonResponse('{"items":[]}');
       }),
     );
 
@@ -39,16 +39,13 @@ void main() {
         if (request.url.path.contains('search')) {
           return utf8JsonResponse(
             jsonEncode({
-              'results': [
+              'items': [
                 {
                   'id': 'hello',
-                  'conceptId': 'concept-hello',
-                  'englishWord': 'Hello',
+                  'englishWord': 'hello',
                   'nepaliWord': 'नमस्ते',
-                  'meaningEnglish': 'Greeting',
-                  'meaningNepali': 'अभिवादन',
                   'category': 'Greetings',
-                  'videoUrl': null,
+                  'meaning': 'A greeting used when meeting someone.',
                 },
               ],
             }),
@@ -66,7 +63,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump();
 
-    expect(find.text('Hello'), findsOneWidget);
+    expect(find.byType(ListTile), findsOneWidget);
     expect(find.textContaining('नमस्ते'), findsOneWidget);
   });
 }

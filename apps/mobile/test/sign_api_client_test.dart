@@ -16,16 +16,13 @@ void main() {
         expect(request.url.queryParameters['lang'], 'en');
 
         final responseBody = jsonEncode({
-          'results': [
+          'items': [
             {
               'id': 'mother',
-              'conceptId': 'concept-mother',
-              'englishWord': 'Mother',
+              'englishWord': 'mother',
               'nepaliWord': 'आमा',
-              'meaningEnglish': 'A female parent.',
-              'meaningNepali': 'महिला अभिभावक।',
               'category': 'Family',
-              'videoUrl': null,
+              'meaning': 'A female parent.',
             },
           ],
         });
@@ -44,6 +41,7 @@ void main() {
     );
 
     expect(results.length, 1);
-    expect(results.first.englishWord, 'Mother');
+    expect(results.first.englishWord, 'mother');
+    expect(results.first.meaning, 'A female parent.');
   });
 }

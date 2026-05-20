@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api/sign_api_client.dart';
 import '../models/search_language.dart';
-import '../models/sign.dart';
+import '../models/sign_search_result.dart';
 import 'sign_detail_screen.dart';
 
 class SearchResultsScreen extends StatefulWidget {
@@ -24,7 +24,7 @@ class SearchResultsScreen extends StatefulWidget {
 }
 
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
-  late Future<List<Sign>> _resultsFuture;
+  late Future<List<SignSearchResult>> _resultsFuture;
 
   @override
   void initState() {
@@ -32,7 +32,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     _resultsFuture = _loadResults();
   }
 
-  Future<List<Sign>> _loadResults() async {
+  Future<List<SignSearchResult>> _loadResults() async {
     final apiResults = await widget.signApiClient.searchSigns(
       query: widget.query,
       language: widget.language,
@@ -60,7 +60,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       appBar: AppBar(
         title: Text('Results for "${widget.query}"'),
       ),
-      body: FutureBuilder<List<Sign>>(
+      body: FutureBuilder<List<SignSearchResult>>(
         future: _resultsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

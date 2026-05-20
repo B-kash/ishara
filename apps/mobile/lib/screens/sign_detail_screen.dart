@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../models/sign.dart';
+import '../models/sign_search_result.dart';
 
 class SignDetailScreen extends StatelessWidget {
   const SignDetailScreen({super.key, required this.sign});
 
-  final Sign sign;
+  final SignSearchResult sign;
 
   @override
   Widget build(BuildContext context) {
@@ -57,12 +57,7 @@ class SignDetailScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          Text(sign.meaningEnglish),
-          const SizedBox(height: 8),
-          Text(
-            sign.meaningNepali,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
+          Text(sign.meaning),
         ],
       ),
     );
