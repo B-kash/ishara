@@ -323,58 +323,73 @@ class _BrowseDictionaryScreenState extends State<BrowseDictionaryScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.browseDictionaryTitle),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: l10n.browseDictionarySearchHint,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isEmpty
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _submitSearch();
-                        },
-                      ),
-                border: const OutlineInputBorder(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final alphabetPanelMaxHeight =
+            (constraints.maxHeight * 0.42).clamp(140.0, 320.0);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Text(
+                l10n.browseDictionaryTitle,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-              textInputAction: TextInputAction.search,
-              onSubmitted: (value) => _submitSearch(),
-              onChanged: (value) {
-                setState(() {});
-              },
             ),
-          ),
-          DictionaryAlphabetPanel(
-            englishLetters: DictionaryAlphabet.englishLetters,
-            nepaliVowelLetters: DictionaryAlphabet.nepaliVowelLetters,
-            nepaliConsonantLetters: DictionaryAlphabet.nepaliConsonantLetters,
-            selectedLetter: _browseLetter,
-            selectedLetterLanguage: _browseLetterLanguage,
-            enabled: !_isSearchMode,
-            onLetterSelected: _jumpToLetter,
-            onClearLetterJump: _clearLetterJump,
-          ),
-          Expanded(
-            child: AsyncStateBody<List<SignSearchResult>>(
-              state: _listState,
-              onRetry: _isSearchMode ? _submitSearch : _loadBrowseFirstPage,
-              emptyMessage: l10n.noSignsFound,
-              successBuilder: (context, signs) => _buildSignList(signs),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: l10n.browseDictionarySearchHint,
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchController.text.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            _submitSearch();
+                          },
+                        ),
+                  border: const OutlineInputBorder(),
+                ),
+                textInputAction: TextInputAction.search,
+                onSubmitted: (value) => _submitSearch(),
+                onChanged: (value) {
+                  setState(() {});
+                },
+              ),
             ),
-          ),
-        ],
-      ),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: alphabetPanelMaxHeight),
+              child: SingleChildScrollView(
+                child: DictionaryAlphabetPanel(
+                  englishLetters: DictionaryAlphabet.englishLetters,
+                  nepaliVowelLetters: DictionaryAlphabet.nepaliVowelLetters,
+                  nepaliConsonantLetters:
+                      DictionaryAlphabet.nepaliConsonantLetters,
+                  selectedLetter: _browseLetter,
+                  selectedLetterLanguage: _browseLetterLanguage,
+                  enabled: !_isSearchMode,
+                  onLetterSelected: _jumpToLetter,
+                  onClearLetterJump: _clearLetterJump,
+                ),
+              ),
+            ),
+            Expanded(
+              child: AsyncStateBody<List<SignSearchResult>>(
+                state: _listState,
+                onRetry: _isSearchMode ? _submitSearch : _loadBrowseFirstPage,
+                emptyMessage: l10n.noSignsFound,
+                successBuilder: (context, signs) => _buildSignList(signs),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

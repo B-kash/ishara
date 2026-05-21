@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api/sign_api_client.dart';
 import '../models/sign_search_result.dart';
-import '../screens/sign_detail_screen.dart';
+import '../navigation/app_body_navigation.dart';
 
 class SignResultListTile extends StatelessWidget {
   const SignResultListTile({
@@ -21,14 +21,7 @@ class SignResultListTile extends StatelessWidget {
       subtitle: Text('${sign.nepaliWord} · ${sign.category}'),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (context) => SignDetailScreen(
-              signApiClient: signApiClient,
-              signId: sign.id,
-            ),
-          ),
-        );
+        context.appBodyNavigation.pushSignDetail(sign.id);
       },
     );
   }

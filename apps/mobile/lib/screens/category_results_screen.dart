@@ -7,8 +7,8 @@ import '../widgets/app_snackbar.dart';
 import '../models/search_language.dart';
 import '../models/sign_search_result.dart';
 import '../state/async_view_state.dart';
+import '../navigation/app_body_navigation.dart';
 import '../widgets/async_state_body.dart';
-import 'sign_detail_screen.dart';
 
 class CategoryResultsScreen extends StatefulWidget {
   const CategoryResultsScreen({
@@ -87,40 +87,42 @@ class _CategoryResultsScreenState extends State<CategoryResultsScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.categoryName),
-      ),
-      body: AsyncStateBody<List<SignSearchResult>>(
-        state: _resultsState,
-        onRetry: _loadResults,
-        emptyMessage: l10n.noSignsInCategory,
-        successBuilder: (context, results) {
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: results.length,
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final sign = results[index];
-              return ListTile(
-                title: Text(sign.englishWord),
-                subtitle: Text('${sign.nepaliWord} · ${sign.category}'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (context) => SignDetailScreen(
-                        signApiClient: widget.signApiClient,
-                        signId: sign.id,
-                      ),
-                    ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            widget.categoryName,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+        Expanded(
+          child: AsyncStateBody<List<SignSearchResult>>(
+            state: _resultsState,
+            onRetry: _loadResults,
+            emptyMessage: l10n.noSignsInCategory,
+            successBuilder: (context, results) {
+              return ListView.separated(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: results.length,
+                separatorBuilder: (context, index) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final sign = results[index];
+                  return ListTile(
+                    title: Text(sign.englishWord),
+                    subtitle: Text('${sign.nepaliWord} · ${sign.category}'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      context.appBodyNavigation.pushSignDetail(sign.id);
+                    },
                   );
                 },
               );
             },
-          );
-        },
-      ),
+          ),
+        ),
+      ],
     );
   }
 }

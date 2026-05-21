@@ -4,28 +4,19 @@ import '../api/sign_api_client.dart';
 import '../l10n/friendly_error_message.dart';
 import '../l10n/l10n_extensions.dart';
 import '../widgets/app_snackbar.dart';
-import '../locale/locale_controller.dart';
 import '../models/category.dart';
 import '../models/search_language.dart';
+import '../navigation/app_body_navigation.dart';
+import '../navigation/app_routes.dart';
 import '../state/async_view_state.dart';
-import '../theme/theme_controller.dart';
-import '../widgets/locale_menu_button.dart';
-import '../widgets/theme_menu_button.dart';
-import 'browse_dictionary_screen.dart';
-import 'category_results_screen.dart';
-import 'search_results_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     required this.signApiClient,
-    required this.themeController,
-    required this.localeController,
     super.key,
   });
 
   final SignApiClient signApiClient;
-  final ThemeController themeController;
-  final LocaleController localeController;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -93,45 +84,18 @@ class _HomeScreenState extends State<HomeScreen> {
     if (query.trim().isEmpty) {
       return;
     }
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => SearchResultsScreen(
-          signApiClient: widget.signApiClient,
-          query: query,
-        ),
-      ),
-    );
-  }
-
-  void _openBrowseDictionary() {
-    final browseLanguage = searchLanguageFromLocale(
-      widget.localeController.locale,
-    );
-
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => BrowseDictionaryScreen(
-          signApiClient: widget.signApiClient,
-          language: browseLanguage,
-        ),
-      ),
-    );
+    context.appBodyNavigation.pushSearch(query);
   }
 
   void _openCategory(Category category) {
     final categoryLanguage = searchLanguageFromLocale(
-      widget.localeController.locale,
+      AppShellScope.of(context).localeController.locale,
     );
 
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => CategoryResultsScreen(
-          signApiClient: widget.signApiClient,
-          categoryId: category.id,
-          categoryName: category.name,
-          language: categoryLanguage,
-        ),
-      ),
+    context.appBodyNavigation.pushCategory(
+      categoryId: category.id,
+      categoryName: category.name,
+      language: categoryLanguage,
     );
   }
 
@@ -179,65 +143,31 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.appTitle,
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ),
-                LocaleMenuButton(localeController: widget.localeController),
-                const SizedBox(width: 4),
-                ThemeMenuButton(themeController: widget.themeController),
-              ],
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: l10n.searchHint,
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.arrow_forward),
+              onPressed: _submitSearch,
             ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.appSubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: l10n.searchHint,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_forward),
-                  onPressed: _submitSearch,
-                ),
-                border: const OutlineInputBorder(),
-              ),
-              textInputAction: TextInputAction.search,
-              onSubmitted: (value) => _submitSearch(),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.tonalIcon(
-              onPressed: _openBrowseDictionary,
-              icon: const Icon(Icons.menu_book_outlined),
-              label: Text(l10n.browseDictionaryAction),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              l10n.categoriesTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            _buildCategoriesSection(context),
-          ],
+            border: const OutlineInputBorder(),
+          ),
+          textInputAction: TextInputAction.search,
+          onSubmitted: (value) => _submitSearch(),
         ),
-      ),
+        const SizedBox(height: 24),
+        Text(
+          l10n.categoriesTitle,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoriesSection(context),
+      ],
     );
   }
 }

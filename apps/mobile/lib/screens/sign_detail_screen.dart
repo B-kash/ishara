@@ -80,48 +80,48 @@ class _SignDetailScreenState extends State<SignDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final appBarTitle = _detailState.data?.englishWord ?? l10n.signDetailTitle;
+    final screenTitle = _detailState.data?.englishWord ?? l10n.signDetailTitle;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(appBarTitle),
-      ),
-      body: AsyncStateBody<SignDetail>(
-        state: _detailState,
-        onRetry: _loadSignDetail,
-        errorTitle: l10n.couldNotLoadSign,
-        emptyMessage: l10n.signNotFound,
-        successBuilder: (context, signDetail) {
-          return ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              SignMediaPanel(signDetail: signDetail),
-              const SizedBox(height: 24),
-              _DetailRow(
-                label: l10n.detailEnglish,
-                value: signDetail.englishWord,
-              ),
-              const SizedBox(height: 12),
-              _DetailRow(
-                label: l10n.detailNepali,
-                value: signDetail.nepaliWord,
-              ),
-              const SizedBox(height: 12),
-              _DetailRow(
-                label: l10n.detailCategory,
-                value: signDetail.category,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                l10n.detailMeaning,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(signDetail.meaning),
-            ],
-          );
-        },
-      ),
+    return AsyncStateBody<SignDetail>(
+      state: _detailState,
+      onRetry: _loadSignDetail,
+      errorTitle: l10n.couldNotLoadSign,
+      emptyMessage: l10n.signNotFound,
+      successBuilder: (context, signDetail) {
+        return ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            Text(
+              screenTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            SignMediaPanel(signDetail: signDetail),
+            const SizedBox(height: 24),
+            _DetailRow(
+              label: l10n.detailEnglish,
+              value: signDetail.englishWord,
+            ),
+            const SizedBox(height: 12),
+            _DetailRow(
+              label: l10n.detailNepali,
+              value: signDetail.nepaliWord,
+            ),
+            const SizedBox(height: 12),
+            _DetailRow(
+              label: l10n.detailCategory,
+              value: signDetail.category,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.detailMeaning,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(signDetail.meaning),
+          ],
+        );
+      },
     );
   }
 }

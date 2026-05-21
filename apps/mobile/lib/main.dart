@@ -4,7 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'api/sign_api_client.dart';
 import 'locale/locale_controller.dart';
-import 'screens/home_screen.dart';
+import 'layout/app_shell.dart';
 import 'theme/theme_controller.dart';
 
 Future<void> main() async {
@@ -66,7 +66,7 @@ class IsharaApp extends StatelessWidget {
 
             return const Locale('en');
           },
-          home: HomeScreen(
+          home: AppShell(
             signApiClient: signApiClient,
             themeController: themeController,
             localeController: localeController,
