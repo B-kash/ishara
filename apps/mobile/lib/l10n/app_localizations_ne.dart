@@ -30,6 +30,12 @@ class AppLocalizationsNe extends AppLocalizations {
   String get searchLanguageNepali => 'नेपाली';
 
   @override
+  String get browseDictionaryTitle => 'शब्दकोश हेर्नुहोस्';
+
+  @override
+  String get browseDictionaryAction => 'सबै शब्दहरू हेर्नुहोस्';
+
+  @override
   String get categoriesTitle => 'वर्गहरू';
 
   @override
@@ -137,6 +143,11 @@ class AppLocalizationsNe extends AppLocalizations {
   @override
   String apiCategorySignsLoadFailed(int statusCode) {
     return 'वर्गका सङ्केतहरू लोड गर्न सकिएन ($statusCode)। API चलिरहेको छ?';
+  }
+
+  @override
+  String apiBrowseDictionaryLoadFailed(int statusCode) {
+    return 'शब्दकोश लोड गर्न सकिएन ($statusCode)। API चलिरहेको छ?';
   }
 
   @override

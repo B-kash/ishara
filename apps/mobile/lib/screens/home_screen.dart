@@ -11,6 +11,7 @@ import '../state/async_view_state.dart';
 import '../theme/theme_controller.dart';
 import '../widgets/locale_menu_button.dart';
 import '../widgets/theme_menu_button.dart';
+import 'browse_dictionary_screen.dart';
 import 'category_results_screen.dart';
 import 'search_results_screen.dart';
 
@@ -97,6 +98,21 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) => SearchResultsScreen(
           signApiClient: widget.signApiClient,
           query: query,
+        ),
+      ),
+    );
+  }
+
+  void _openBrowseDictionary() {
+    final browseLanguage = searchLanguageFromLocale(
+      widget.localeController.locale,
+    );
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => BrowseDictionaryScreen(
+          signApiClient: widget.signApiClient,
+          language: browseLanguage,
         ),
       ),
     );
@@ -205,6 +221,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               textInputAction: TextInputAction.search,
               onSubmitted: (value) => _submitSearch(),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.tonalIcon(
+              onPressed: _openBrowseDictionary,
+              icon: const Icon(Icons.menu_book_outlined),
+              label: Text(l10n.browseDictionaryAction),
             ),
             const SizedBox(height: 24),
             Text(

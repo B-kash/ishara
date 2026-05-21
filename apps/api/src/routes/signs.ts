@@ -7,17 +7,23 @@ import {
 } from "../errors/api-error.js";
 import { toSignDetail, toSignSearchResult } from "../mappers/sign-response.js";
 import {
+  validateOptionalCursor,
+  validatePageLimit,
   validateRequiredQueryParam,
   validateRouteId,
+  validateSearchLanguageParam,
 } from "../validation/request-validation.js";
 
 interface SignRouteParams {
   id: string;
 }
 
-function getSearchQuery(request: FastifyRequest): string | undefined {
+function getQueryParam(
+  request: FastifyRequest,
+  paramName: string,
+): string | undefined {
   const queryValue = request.query as Record<string, string | undefined>;
-  return queryValue["q"];
+  return queryValue[paramName];
 }
 
 export async function signRoutes(server: FastifyInstance) {
@@ -25,7 +31,7 @@ export async function signRoutes(server: FastifyInstance) {
     const { signRepository, log } = request.app;
 
     const searchQueryResult = validateRequiredQueryParam(
-      getSearchQuery(request),
+      getQueryParam(request, "q"),
       "q",
     );
     if (!searchQueryResult.ok) {
@@ -44,6 +50,57 @@ export async function signRoutes(server: FastifyInstance) {
       );
 
       return { items };
+    } catch (error) {
+      log.error(error);
+      return reply.status(503).send(databaseErrorResponse());
+    }
+  });
+
+  server.get("/signs", async (request, reply) => {
+    const { signRepository, log } = request.app;
+
+    const languageResult = validateSearchLanguageParam(
+      getQueryParam(request, "lang"),
+    );
+    if (!languageResult.ok) {
+      return reply
+        .status(400)
+        .send(validationErrorResponse(languageResult.message));
+    }
+
+    const cursorResult = validateOptionalCursor(
+      getQueryParam(request, "cursor"),
+    );
+    if (!cursorResult.ok) {
+      return reply
+        .status(400)
+        .send(validationErrorResponse(cursorResult.message));
+    }
+
+    const limitResult = validatePageLimit(getQueryParam(request, "limit"));
+    if (!limitResult.ok) {
+      return reply
+        .status(400)
+        .send(validationErrorResponse(limitResult.message));
+    }
+
+    try {
+      const browsePage = await signRepository.listSignRecordsPage({
+        cursor: cursorResult.value,
+        limit: limitResult.value,
+      });
+
+      const items = browsePage.items.map((signRecord) =>
+        toSignSearchResult(signRecord, languageResult.value),
+      );
+
+      return {
+        items,
+        pageInfo: {
+          nextCursor: browsePage.nextCursor,
+          hasMore: browsePage.hasMore,
+        },
+      };
     } catch (error) {
       log.error(error);
       return reply.status(503).send(databaseErrorResponse());

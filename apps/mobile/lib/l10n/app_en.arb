@@ -7,6 +7,8 @@
   "searchHintNepali": "Search in Nepali",
   "searchLanguageEnglish": "English",
   "searchLanguageNepali": "Nepali",
+  "browseDictionaryTitle": "Browse dictionary",
+  "browseDictionaryAction": "Browse all words",
   "categoriesTitle": "Categories",
   "couldNotLoadCategories": "Could not load categories",
   "noCategoriesYet": "No categories yet.",
@@ -56,6 +58,14 @@
   "apiCategoryNotFound": "Category not found",
   "apiCategorySignsLoadFailed": "Could not load category signs ({statusCode}). Is the API running?",
   "@apiCategorySignsLoadFailed": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "apiBrowseDictionaryLoadFailed": "Could not load dictionary ({statusCode}). Is the API running?",
+  "@apiBrowseDictionaryLoadFailed": {
     "placeholders": {
       "statusCode": {
         "type": "int"

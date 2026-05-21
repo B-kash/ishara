@@ -8,6 +8,7 @@ enum FetchErrorContext {
   categories,
   search,
   categorySigns,
+  browseDictionary,
   signDetail,
 }
 
@@ -39,6 +40,8 @@ String _friendlySignApiError(
       return l10n.couldNotLoadCategories;
     case SignApiErrorKind.categorySignsLoadFailed:
       return l10n.couldNotReachApi;
+    case SignApiErrorKind.browseDictionaryLoadFailed:
+      return l10n.couldNotReachApi;
     case SignApiErrorKind.searchFailed:
       return l10n.couldNotReachApi;
     case SignApiErrorKind.signLoadFailed:
@@ -55,6 +58,7 @@ String _defaultFriendlyMessage(
       return l10n.couldNotLoadCategories;
     case FetchErrorContext.search:
     case FetchErrorContext.categorySigns:
+    case FetchErrorContext.browseDictionary:
       return l10n.couldNotReachApi;
     case FetchErrorContext.signDetail:
       return l10n.couldNotLoadSign;

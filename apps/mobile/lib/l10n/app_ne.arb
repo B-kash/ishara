@@ -7,6 +7,8 @@
   "searchHintNepali": "नेपालीमा खोज्नुहोस्",
   "searchLanguageEnglish": "अङ्ग्रेजी",
   "searchLanguageNepali": "नेपाली",
+  "browseDictionaryTitle": "शब्दकोश हेर्नुहोस्",
+  "browseDictionaryAction": "सबै शब्दहरू हेर्नुहोस्",
   "categoriesTitle": "वर्गहरू",
   "couldNotLoadCategories": "वर्गहरू लोड गर्न सकिएन",
   "noCategoriesYet": "अहिले कुनै वर्ग छैन।",
@@ -41,6 +43,14 @@
   "apiCategoriesLoadFailed": "वर्गहरू लोड गर्न सकिएन ({statusCode})। API चलिरहेको छ?",
   "apiCategoryNotFound": "वर्ग फेला परेन",
   "apiCategorySignsLoadFailed": "वर्गका सङ्केतहरू लोड गर्न सकिएन ({statusCode})। API चलिरहेको छ?",
+  "apiBrowseDictionaryLoadFailed": "शब्दकोश लोड गर्न सकिएन ({statusCode})। API चलिरहेको छ?",
+  "@apiBrowseDictionaryLoadFailed": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
   "apiSearchFailed": "खोज असफल ({statusCode})। API चलिरहेको छ?",
   "apiSignNotFound": "सङ्केत फेला परेन",
   "apiSignLoadFailed": "सङ्केत लोड गर्न सकिएन ({statusCode})। API चलिरहेको छ?"

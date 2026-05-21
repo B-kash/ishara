@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../models/category.dart';
 import '../models/search_language.dart';
+import '../models/sign_browse_page.dart';
 import '../models/sign_detail.dart';
 import '../models/sign_search_result.dart';
 
@@ -13,6 +14,7 @@ enum SignApiErrorKind {
   categoriesLoadFailed,
   categoryNotFound,
   categorySignsLoadFailed,
+  browseDictionaryLoadFailed,
   searchFailed,
   signNotFound,
   signLoadFailed,
@@ -34,6 +36,8 @@ class SignApiException implements Exception {
         return l10n.apiCategoryNotFound;
       case SignApiErrorKind.categorySignsLoadFailed:
         return l10n.apiCategorySignsLoadFailed(statusCode);
+      case SignApiErrorKind.browseDictionaryLoadFailed:
+        return l10n.apiBrowseDictionaryLoadFailed(statusCode);
       case SignApiErrorKind.searchFailed:
         return l10n.apiSearchFailed(statusCode);
       case SignApiErrorKind.signNotFound:
@@ -104,6 +108,37 @@ class SignApiClient {
               SignSearchResult.fromJson(entry as Map<String, dynamic>),
         )
         .toList();
+  }
+
+  Future<SignBrowsePage> listSigns({
+    required SearchLanguage language,
+    String? cursor,
+    int limit = 20,
+  }) async {
+    final queryParameters = <String, String>{
+      'lang': language.apiCode,
+      'limit': limit.toString(),
+    };
+
+    if (cursor != null) {
+      queryParameters['cursor'] = cursor;
+    }
+
+    final uri = Uri.parse('$baseUrl/signs').replace(
+      queryParameters: queryParameters,
+    );
+
+    final response = await httpClient.get(uri);
+
+    if (response.statusCode != 200) {
+      throw SignApiException(
+        SignApiErrorKind.browseDictionaryLoadFailed,
+        statusCode: response.statusCode,
+      );
+    }
+
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    return SignBrowsePage.fromJson(body);
   }
 
   Future<List<SignSearchResult>> searchSigns({

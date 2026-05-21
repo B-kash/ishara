@@ -1,8 +1,17 @@
 import type { Category } from "../types/api-responses.js";
+import type { SignBrowsePage } from "../types/sign-browse-page.js";
 import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
+
+export interface ListSignRecordsPageOptions {
+  cursor?: string;
+  limit: number;
+}
 
 export interface SignRepository {
   getAllSignRecords(): Promise<SignRecord[]>;
+  listSignRecordsPage(
+    options: ListSignRecordsPageOptions,
+  ): Promise<SignBrowsePage>;
   getSignById(signId: string): Promise<SignRecord | undefined>;
   searchSignRecords(searchQuery: string): Promise<SignRecord[]>;
   getAllCategories(): Promise<Category[]>;

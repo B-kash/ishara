@@ -140,6 +140,18 @@ abstract class AppLocalizations {
   /// **'Nepali'**
   String get searchLanguageNepali;
 
+  /// No description provided for @browseDictionaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse dictionary'**
+  String get browseDictionaryTitle;
+
+  /// No description provided for @browseDictionaryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse all words'**
+  String get browseDictionaryAction;
+
   /// No description provided for @categoriesTitle.
   ///
   /// In en, this message translates to:
@@ -343,6 +355,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load category signs ({statusCode}). Is the API running?'**
   String apiCategorySignsLoadFailed(int statusCode);
+
+  /// No description provided for @apiBrowseDictionaryLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load dictionary ({statusCode}). Is the API running?'**
+  String apiBrowseDictionaryLoadFailed(int statusCode);
 
   /// No description provided for @apiSearchFailed.
   ///

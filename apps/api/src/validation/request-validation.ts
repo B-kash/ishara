@@ -43,6 +43,45 @@ export function validateSearchLanguageParam(
 /** URL path ids are slugs (e.g. hello, thank-you, family). Not used inside SQL text. */
 const slugIdPattern = /^[a-z0-9-]+$/;
 
+export const DEFAULT_PAGE_LIMIT = 20;
+export const MAX_PAGE_LIMIT = 100;
+
+export function validateOptionalCursor(
+  cursorInput: string | undefined,
+): ValidationResult<string | undefined> {
+  const trimmedCursor = cursorInput?.trim();
+  if (!trimmedCursor) {
+    return { ok: true, value: undefined };
+  }
+
+  if (!slugIdPattern.test(trimmedCursor)) {
+    return validationFailure("Query parameter cursor is invalid");
+  }
+
+  return { ok: true, value: trimmedCursor };
+}
+
+export function validatePageLimit(
+  limitInput: string | undefined,
+): ValidationResult<number> {
+  if (!limitInput?.trim()) {
+    return { ok: true, value: DEFAULT_PAGE_LIMIT };
+  }
+
+  const parsedLimit = Number.parseInt(limitInput, 10);
+  if (
+    !Number.isInteger(parsedLimit) ||
+    parsedLimit < 1 ||
+    parsedLimit > MAX_PAGE_LIMIT
+  ) {
+    return validationFailure(
+      `Query parameter limit must be between 1 and ${MAX_PAGE_LIMIT}`,
+    );
+  }
+
+  return { ok: true, value: parsedLimit };
+}
+
 export function validateRouteId(
   routeId: string | undefined,
   resourceName: string,

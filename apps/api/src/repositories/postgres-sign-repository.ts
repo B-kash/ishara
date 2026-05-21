@@ -1,9 +1,11 @@
 import type pg from "pg";
+import { buildSignBrowsePage } from "../data/sign-browse-pagination.js";
 import {
   signRecordMatchesBilingualSearch,
   sortSignRecordsBySearchScore,
 } from "../data/sign-search-matching.js";
 import type { Category } from "../types/api-responses.js";
+import type { SignBrowsePage } from "../types/sign-browse-page.js";
 import type { SignRecord } from "../types/sign-record.js";
 import { createPostgresPool } from "./postgres/postgres-pool.js";
 import {
@@ -11,7 +13,10 @@ import {
   signRecordSelectSql,
   type SignRecordRow,
 } from "./postgres/postgres-row-mapper.js";
-import type { SignRepository } from "./sign-repository.js";
+import type {
+  ListSignRecordsPageOptions,
+  SignRepository,
+} from "./sign-repository.js";
 
 export class PostgresSignRepository implements SignRepository {
   private readonly pool: pg.Pool;
@@ -34,7 +39,24 @@ export class PostgresSignRepository implements SignRepository {
   }
 
   async getAllSignRecords(): Promise<SignRecord[]> {
-    return this.querySignRecords("order by signs.id", []);
+    return this.querySignRecords("order by signs.id asc", []);
+  }
+
+  async listSignRecordsPage(
+    options: ListSignRecordsPageOptions,
+  ): Promise<SignBrowsePage> {
+    const fetchLimit = options.limit + 1;
+
+    const candidateRecords = options.cursor
+      ? await this.querySignRecords(
+          "where signs.id > $1 order by signs.id asc limit $2",
+          [options.cursor, fetchLimit],
+        )
+      : await this.querySignRecords("order by signs.id asc limit $1", [
+          fetchLimit,
+        ]);
+
+    return buildSignBrowsePage(candidateRecords, options.limit);
   }
 
   async getSignById(signId: string): Promise<SignRecord | undefined> {

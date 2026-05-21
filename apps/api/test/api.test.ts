@@ -31,6 +31,61 @@ describe("GET /health", () => {
   });
 });
 
+describe("GET /signs", () => {
+  test("returns first page ordered by id", async () => {
+    const response = await server.inject({
+      method: "GET",
+      url: "/signs?lang=en&limit=2",
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json<{
+      items: { id: string }[];
+      pageInfo: { nextCursor: string | null; hasMore: boolean };
+    }>();
+    assert.equal(body.items.length, 2);
+    assert.equal(body.items[0]?.id, "father");
+    assert.equal(body.items[1]?.id, "friend");
+    assert.equal(body.pageInfo.hasMore, true);
+    assert.equal(body.pageInfo.nextCursor, "friend");
+  });
+
+  test("returns next page using cursor", async () => {
+    const firstPageResponse = await server.inject({
+      method: "GET",
+      url: "/signs?lang=en&limit=2",
+    });
+    const firstPage = firstPageResponse.json<{
+      pageInfo: { nextCursor: string };
+    }>();
+
+    const response = await server.inject({
+      method: "GET",
+      url: `/signs?lang=en&limit=2&cursor=${firstPage.pageInfo.nextCursor}`,
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json<{
+      items: { id: string }[];
+      pageInfo: { hasMore: boolean };
+    }>();
+    assert.equal(body.items.length, 2);
+    assert.equal(body.items[0]?.id, "hello");
+    assert.ok(body.pageInfo.hasMore);
+  });
+
+  test("returns validation error when lang is missing", async () => {
+    const response = await server.inject({
+      method: "GET",
+      url: "/signs",
+    });
+
+    assert.equal(response.statusCode, 400);
+    const body = response.json<{ error: { code: string } }>();
+    assert.equal(body.error.code, "VALIDATION_ERROR");
+  });
+});
+
 describe("GET /signs/search", () => {
   test("returns mother for English query without lang", async () => {
     const response = await server.inject({

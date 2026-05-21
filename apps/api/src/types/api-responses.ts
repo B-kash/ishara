@@ -19,6 +19,16 @@ export interface SignSearchResponse {
   items: SignSearchResult[];
 }
 
+export interface SignBrowsePageInfo {
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
+export interface SignBrowseResponse {
+  items: SignSearchResult[];
+  pageInfo: SignBrowsePageInfo;
+}
+
 export interface SignDetail {
   id: string;
   englishWord: string;

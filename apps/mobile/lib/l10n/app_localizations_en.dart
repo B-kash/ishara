@@ -30,6 +30,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchLanguageNepali => 'Nepali';
 
   @override
+  String get browseDictionaryTitle => 'Browse dictionary';
+
+  @override
+  String get browseDictionaryAction => 'Browse all words';
+
+  @override
   String get categoriesTitle => 'Categories';
 
   @override
@@ -136,6 +142,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String apiCategorySignsLoadFailed(int statusCode) {
     return 'Could not load category signs ($statusCode). Is the API running?';
+  }
+
+  @override
+  String apiBrowseDictionaryLoadFailed(int statusCode) {
+    return 'Could not load dictionary ($statusCode). Is the API running?';
   }
 
   @override

@@ -4,11 +4,19 @@ import { fileURLToPath } from "node:url";
 import type { Category } from "../types/api-responses.js";
 import { categoryNameToId } from "../data/category-slug.js";
 import {
+  buildSignBrowsePage,
+  filterSignRecordsAfterCursor,
+} from "../data/sign-browse-pagination.js";
+import {
   signRecordMatchesBilingualSearch,
   sortSignRecordsBySearchScore,
 } from "../data/sign-search-matching.js";
+import type { SignBrowsePage } from "../types/sign-browse-page.js";
 import type { SignRecord } from "../types/sign-record.js";
-import type { SignRepository } from "./sign-repository.js";
+import type {
+  ListSignRecordsPageOptions,
+  SignRepository,
+} from "./sign-repository.js";
 
 const mockDataDirectory = dirname(fileURLToPath(import.meta.url));
 const mockSignsFilePath = join(
@@ -51,6 +59,21 @@ export class MockSignRepository implements SignRepository {
 
   async getAllSignRecords(): Promise<SignRecord[]> {
     return this.signRecords;
+  }
+
+  async listSignRecordsPage(
+    options: ListSignRecordsPageOptions,
+  ): Promise<SignBrowsePage> {
+    const sortedSignRecords = [...this.signRecords].sort((left, right) =>
+      left.id.localeCompare(right.id),
+    );
+    const filteredSignRecords = filterSignRecordsAfterCursor(
+      sortedSignRecords,
+      options.cursor,
+    );
+    const candidatePage = filteredSignRecords.slice(0, options.limit + 1);
+
+    return buildSignBrowsePage(candidatePage, options.limit);
   }
 
   async getSignById(signId: string): Promise<SignRecord | undefined> {
