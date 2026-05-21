@@ -1,6 +1,5 @@
 import type pg from "pg";
 import {
-  collectBilingualSearchTerms,
   signRecordMatchesBilingualSearch,
   sortSignRecordsBySearchScore,
 } from "../data/sign-search-matching.js";
@@ -43,32 +42,19 @@ export class PostgresSignRepository implements SignRepository {
   }
 
   async searchSignRecords(searchQuery: string): Promise<SignRecord[]> {
-    const searchTerms = collectBilingualSearchTerms(searchQuery);
-    if (searchTerms.length === 0) {
+    const trimmedQuery = searchQuery.trim();
+    if (!trimmedQuery) {
       return [];
     }
 
-    const candidateRecords = await this.querySignRecords(
-      `where exists (
-        select 1
-        from words search_words
-        where search_words.concept_id = concepts.id
-          and exists (
-            select 1
-            from unnest($1::text[]) as search_term
-            where lower(search_words.word) like '%' || search_term || '%'
-               or search_term like '%' || lower(search_words.word) || '%'
-          )
-      )
-      order by signs.id`,
-      [searchTerms],
+    // Full scan + in-memory fuzzy match (dictionary size is small for MVP).
+    // SQL LIKE pre-filters skip typo matches before Levenshtein can run.
+    const allRecords = await this.getAllSignRecords();
+    const matchedRecords = allRecords.filter((signRecord) =>
+      signRecordMatchesBilingualSearch(signRecord, trimmedQuery),
     );
 
-    const matchedRecords = candidateRecords.filter((signRecord) =>
-      signRecordMatchesBilingualSearch(signRecord, searchQuery),
-    );
-
-    return sortSignRecordsBySearchScore(matchedRecords, searchQuery);
+    return sortSignRecordsBySearchScore(matchedRecords, trimmedQuery);
   }
 
   async getAllCategories(): Promise<Category[]> {

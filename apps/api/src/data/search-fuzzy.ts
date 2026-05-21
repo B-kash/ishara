@@ -55,6 +55,16 @@ export function fuzzyMatchScore(word: string, searchTerm: string): number {
     return 40;
   }
 
+  if (searchTerm.length >= 2 && searchTerm.length < word.length) {
+    const wordPrefix = word.slice(0, searchTerm.length);
+    const prefixMaxDistance = searchTerm.length <= 3 ? 1 : 2;
+    const prefixEditDistance = levenshteinDistance(wordPrefix, searchTerm);
+
+    if (prefixEditDistance <= prefixMaxDistance) {
+      return Math.max(50, 70 - prefixEditDistance * 10);
+    }
+  }
+
   const maxEditDistance =
     searchTerm.length <= 3 ? 1 : searchTerm.length <= 6 ? 2 : 3;
   const editDistance = levenshteinDistance(word, searchTerm);
