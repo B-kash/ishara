@@ -12,6 +12,7 @@
   "browseDictionarySearchHint": "शब्दकोशमा खोज्नुहोस्",
   "jumpToLetterTitle": "अक्षरमा जानुहोस्",
   "jumpToLetterHint": "अक्षर थिचेर त्यहीबाट हेर्नुहोस्",
+  "clearLetterJump": "अक्षर फिल्टर हटाउनुहोस्",
   "jumpToLetterSelected": "{language}: {letter}",
   "@jumpToLetterSelected": {
     "placeholders": {

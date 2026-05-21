@@ -102,6 +102,19 @@ class _BrowseDictionaryScreenState extends State<BrowseDictionaryScreen> {
     _loadBrowseFirstPage();
   }
 
+  void _clearLetterJump() {
+    if (_browseLetter == null && _browseLetterLanguage == null) {
+      return;
+    }
+
+    setState(() {
+      _isSearchMode = false;
+      _browseLetter = null;
+      _browseLetterLanguage = null;
+    });
+    _loadBrowseFirstPage();
+  }
+
   Future<void> _submitSearch() async {
     final query = _searchController.text.trim();
     if (query.isEmpty) {
@@ -350,6 +363,7 @@ class _BrowseDictionaryScreenState extends State<BrowseDictionaryScreen> {
             selectedLetterLanguage: _browseLetterLanguage,
             enabled: !_isSearchMode,
             onLetterSelected: _jumpToLetter,
+            onClearLetterJump: _clearLetterJump,
           ),
           Expanded(
             child: AsyncStateBody<List<SignSearchResult>>(

@@ -170,6 +170,12 @@ abstract class AppLocalizations {
   /// **'Tap a letter to browse from that point'**
   String get jumpToLetterHint;
 
+  /// No description provided for @clearLetterJump.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear letter filter'**
+  String get clearLetterJump;
+
   /// No description provided for @jumpToLetterSelected.
   ///
   /// In en, this message translates to:

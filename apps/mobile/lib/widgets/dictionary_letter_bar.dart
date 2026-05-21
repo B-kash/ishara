@@ -107,7 +107,8 @@ class DictionaryAlphabetPanel extends StatelessWidget {
     required this.selectedLetterLanguage,
     required this.onLetterSelected,
     this.enabled = true,
-    this.initiallyExpanded = true,
+    this.initiallyExpanded = false,
+    this.onClearLetterJump,
   });
 
   final List<String> englishLetters;
@@ -118,6 +119,7 @@ class DictionaryAlphabetPanel extends StatelessWidget {
   final void Function(String letter, SearchLanguage letterLanguage) onLetterSelected;
   final bool enabled;
   final bool initiallyExpanded;
+  final VoidCallback? onClearLetterJump;
 
   String? _buildExpansionSubtitle(AppLocalizations l10n) {
     if (!enabled || selectedLetter == null || selectedLetterLanguage == null) {
@@ -150,7 +152,19 @@ class DictionaryAlphabetPanel extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: ExpansionTile(
               initiallyExpanded: initiallyExpanded && enabled,
-              title: Text(l10n.jumpToLetterTitle),
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Text(l10n.jumpToLetterTitle),
+                  ),
+                  if (selectedLetter != null && onClearLetterJump != null)
+                    IconButton(
+                      icon: const Icon(Icons.clear),
+                      tooltip: l10n.clearLetterJump,
+                      onPressed: onClearLetterJump,
+                    ),
+                ],
+              ),
               subtitle: Text(
                 expansionSubtitle ?? l10n.jumpToLetterHint,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -163,6 +177,15 @@ class DictionaryAlphabetPanel extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      if (selectedLetter != null && onClearLetterJump != null)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed: onClearLetterJump,
+                            icon: const Icon(Icons.clear),
+                            label: Text(l10n.clearLetterJump),
+                          ),
+                        ),
                       DictionaryLetterBar(
                         letters: englishLetters,
                         label: l10n.englishLettersLabel,

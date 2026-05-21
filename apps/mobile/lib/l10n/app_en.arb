@@ -12,6 +12,7 @@
   "browseDictionarySearchHint": "Search dictionary",
   "jumpToLetterTitle": "Jump to letter",
   "jumpToLetterHint": "Tap a letter to browse from that point",
+  "clearLetterJump": "Clear letter filter",
   "jumpToLetterSelected": "{language}: {letter}",
   "@jumpToLetterSelected": {
     "placeholders": {

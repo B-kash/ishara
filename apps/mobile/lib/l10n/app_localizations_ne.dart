@@ -45,6 +45,9 @@ class AppLocalizationsNe extends AppLocalizations {
   String get jumpToLetterHint => 'अक्षर थिचेर त्यहीबाट हेर्नुहोस्';
 
   @override
+  String get clearLetterJump => 'अक्षर फिल्टर हटाउनुहोस्';
+
+  @override
   String jumpToLetterSelected(String language, String letter) {
     return '$language: $letter';
   }

@@ -45,6 +45,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jumpToLetterHint => 'Tap a letter to browse from that point';
 
   @override
+  String get clearLetterJump => 'Clear letter filter';
+
+  @override
   String jumpToLetterSelected(String language, String letter) {
     return '$language: $letter';
   }
