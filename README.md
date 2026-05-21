@@ -198,9 +198,13 @@ Examples:
 Other platforms:
 
 ```bash
-flutter run -d android   # Android
+flutter run -d android   # Android (emulator: use 10.0.2.2 for API — see apps/mobile/README.md)
 flutter run -d ios       # iOS (macOS with Xcode)
 ```
+
+**Themes:** palette icon on the home screen (5 themes, saved locally).
+
+Platform notes: [apps/mobile/README.md](apps/mobile/README.md)
 
 Run tests:
 

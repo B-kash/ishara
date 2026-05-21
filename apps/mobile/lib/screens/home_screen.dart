@@ -4,13 +4,20 @@ import '../api/sign_api_client.dart';
 import '../models/category.dart';
 import '../models/search_language.dart';
 import '../state/async_view_state.dart';
+import '../theme/theme_controller.dart';
+import '../widgets/theme_menu_button.dart';
 import 'category_results_screen.dart';
 import 'search_results_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({required this.signApiClient, super.key});
+  const HomeScreen({
+    required this.signApiClient,
+    required this.themeController,
+    super.key,
+  });
 
   final SignApiClient signApiClient;
+  final ThemeController themeController;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -146,11 +153,19 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            Text(
-              'Ishara',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Ishara',
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
+                ),
+                ThemeMenuButton(themeController: widget.themeController),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
