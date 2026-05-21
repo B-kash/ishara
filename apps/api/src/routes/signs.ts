@@ -7,6 +7,7 @@ import {
 } from "../errors/api-error.js";
 import { toSignDetail, toSignSearchResult } from "../mappers/sign-response.js";
 import {
+  validateBrowseLetterParams,
   validateOptionalCursor,
   validatePageLimit,
   validateRequiredQueryParam,
@@ -84,10 +85,22 @@ export async function signRoutes(server: FastifyInstance) {
         .send(validationErrorResponse(limitResult.message));
     }
 
+    const letterResult = validateBrowseLetterParams(
+      getQueryParam(request, "letter"),
+      getQueryParam(request, "letterLang"),
+    );
+    if (!letterResult.ok) {
+      return reply
+        .status(400)
+        .send(validationErrorResponse(letterResult.message));
+    }
+
     try {
       const browsePage = await signRepository.listSignRecordsPage({
         cursor: cursorResult.value,
         limit: limitResult.value,
+        letter: letterResult.value?.letter,
+        letterLanguage: letterResult.value?.letterLanguage,
       });
 
       const items = browsePage.items.map((signRecord) =>

@@ -84,6 +84,30 @@ describe("GET /signs", () => {
     const body = response.json<{ error: { code: string } }>();
     assert.equal(body.error.code, "VALIDATION_ERROR");
   });
+
+  test("returns signs starting with Nepali vowel आ", async () => {
+    const nepaliLetter = encodeURIComponent("आ");
+    const response = await server.inject({
+      method: "GET",
+      url: `/signs?lang=ne&limit=10&letter=${nepaliLetter}&letterLang=ne`,
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json<{ items: { id: string }[] }>();
+    assert.ok(body.items.some((item) => item.id === "mother"));
+  });
+
+  test("returns signs starting with letter m in English", async () => {
+    const response = await server.inject({
+      method: "GET",
+      url: "/signs?lang=en&limit=10&letter=m&letterLang=en",
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json<{ items: { id: string }[] }>();
+    assert.ok(body.items.every((item) => item.id === "mother"));
+    assert.equal(body.items.length, 1);
+  });
 });
 
 describe("GET /signs/search", () => {

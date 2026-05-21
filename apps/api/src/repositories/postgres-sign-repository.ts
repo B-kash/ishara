@@ -1,4 +1,5 @@
 import type pg from "pg";
+import { buildLetterPrefixPattern } from "../data/browse-letters.js";
 import { buildSignBrowsePage } from "../data/sign-browse-pagination.js";
 import {
   signRecordMatchesBilingualSearch,
@@ -46,6 +47,29 @@ export class PostgresSignRepository implements SignRepository {
     options: ListSignRecordsPageOptions,
   ): Promise<SignBrowsePage> {
     const fetchLimit = options.limit + 1;
+
+    if (options.letter && options.letterLanguage) {
+      const letterPattern = buildLetterPrefixPattern(
+        options.letter,
+        options.letterLanguage,
+      );
+      const wordColumn =
+        options.letterLanguage === "en"
+          ? "lower(english_words.word)"
+          : "nepali_words.word";
+
+      const candidateRecords = options.cursor
+        ? await this.querySignRecords(
+            `where ${wordColumn} like $1 and signs.id > $2 order by signs.id asc limit $3`,
+            [letterPattern, options.cursor, fetchLimit],
+          )
+        : await this.querySignRecords(
+            `where ${wordColumn} like $1 order by signs.id asc limit $2`,
+            [letterPattern, fetchLimit],
+          );
+
+      return buildSignBrowsePage(candidateRecords, options.limit);
+    }
 
     const candidateRecords = options.cursor
       ? await this.querySignRecords(

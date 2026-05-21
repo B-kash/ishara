@@ -5,6 +5,8 @@ import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
 export interface ListSignRecordsPageOptions {
   cursor?: string;
   limit: number;
+  letter?: string;
+  letterLanguage?: SearchLanguageCode;
 }
 
 export interface SignRepository {

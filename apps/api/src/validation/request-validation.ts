@@ -1,3 +1,4 @@
+import { isValidBrowseLetter } from "../data/browse-letters.js";
 import { parseSearchLanguage } from "../data/sign-search.js";
 import type { SearchLanguageCode } from "../types/sign-record.js";
 
@@ -59,6 +60,38 @@ export function validateOptionalCursor(
   }
 
   return { ok: true, value: trimmedCursor };
+}
+
+export function validateBrowseLetterParams(
+  letterInput: string | undefined,
+  letterLanguageInput: string | undefined,
+): ValidationResult<{ letter: string; letterLanguage: SearchLanguageCode } | undefined> {
+  const trimmedLetter = letterInput?.trim();
+  const trimmedLetterLanguage = letterLanguageInput?.trim();
+
+  if (!trimmedLetter && !trimmedLetterLanguage) {
+    return { ok: true, value: undefined };
+  }
+
+  if (!trimmedLetter || !trimmedLetterLanguage) {
+    return validationFailure(
+      'Query parameters letter and letterLang must be used together',
+    );
+  }
+
+  const letterLanguage = parseSearchLanguage(trimmedLetterLanguage);
+  if (!letterLanguage) {
+    return validationFailure('Query parameter letterLang must be "en" or "ne"');
+  }
+
+  if (!isValidBrowseLetter(trimmedLetter, letterLanguage)) {
+    return validationFailure("Query parameter letter is invalid");
+  }
+
+  return {
+    ok: true,
+    value: { letter: trimmedLetter, letterLanguage },
+  };
 }
 
 export function validatePageLimit(

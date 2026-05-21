@@ -36,6 +36,35 @@ class AppLocalizationsNe extends AppLocalizations {
   String get browseDictionaryAction => 'सबै शब्दहरू हेर्नुहोस्';
 
   @override
+  String get browseDictionarySearchHint => 'शब्दकोशमा खोज्नुहोस्';
+
+  @override
+  String get jumpToLetterTitle => 'अक्षरमा जानुहोस्';
+
+  @override
+  String get jumpToLetterHint => 'अक्षर थिचेर त्यहीबाट हेर्नुहोस्';
+
+  @override
+  String jumpToLetterSelected(String language, String letter) {
+    return '$language: $letter';
+  }
+
+  @override
+  String get englishLettersLabel => 'अङ्ग्रेजी';
+
+  @override
+  String get nepaliLettersLabel => 'नेपाली';
+
+  @override
+  String get nepaliVowelsLabel => 'नेपाली स्वर';
+
+  @override
+  String get nepaliConsonantsLabel => 'नेपाली व्यञ्जन';
+
+  @override
+  String get loadMore => 'थप लोड गर्नुहोस्';
+
+  @override
   String get categoriesTitle => 'वर्गहरू';
 
   @override

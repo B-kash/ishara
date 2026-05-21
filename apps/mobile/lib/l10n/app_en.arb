@@ -9,6 +9,25 @@
   "searchLanguageNepali": "Nepali",
   "browseDictionaryTitle": "Browse dictionary",
   "browseDictionaryAction": "Browse all words",
+  "browseDictionarySearchHint": "Search dictionary",
+  "jumpToLetterTitle": "Jump to letter",
+  "jumpToLetterHint": "Tap a letter to browse from that point",
+  "jumpToLetterSelected": "{language}: {letter}",
+  "@jumpToLetterSelected": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      },
+      "letter": {
+        "type": "String"
+      }
+    }
+  },
+  "englishLettersLabel": "English",
+  "nepaliLettersLabel": "Nepali",
+  "nepaliVowelsLabel": "Nepali vowels",
+  "nepaliConsonantsLabel": "Nepali consonants",
+  "loadMore": "Load more",
   "categoriesTitle": "Categories",
   "couldNotLoadCategories": "Could not load categories",
   "noCategoriesYet": "No categories yet.",

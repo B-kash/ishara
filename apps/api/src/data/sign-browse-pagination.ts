@@ -1,5 +1,13 @@
-import type { SignRecord } from "../types/sign-record.js";
+import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
 import type { SignBrowsePage } from "../types/sign-browse-page.js";
+import { signRecordMatchesBrowseLetter } from "./browse-letters.js";
+
+export interface BrowsePageQuery {
+  cursor?: string;
+  limit: number;
+  letter?: string;
+  letterLanguage?: SearchLanguageCode;
+}
 
 export function buildSignBrowsePage(
   signRecords: SignRecord[],
@@ -25,4 +33,31 @@ export function filterSignRecordsAfterCursor(
   }
 
   return sortedSignRecords.filter((signRecord) => signRecord.id > cursor);
+}
+
+export function prepareBrowseSignRecords(
+  signRecords: SignRecord[],
+  query: BrowsePageQuery,
+): SignRecord[] {
+  const sortedSignRecords = [...signRecords].sort((left, right) =>
+    left.id.localeCompare(right.id),
+  );
+
+  const letterFilteredSignRecords =
+    query.letter && query.letterLanguage
+      ? sortedSignRecords.filter((signRecord) =>
+          signRecordMatchesBrowseLetter(
+            signRecord,
+            query.letter!,
+            query.letterLanguage!,
+          ),
+        )
+      : sortedSignRecords;
+
+  const cursorFilteredSignRecords = filterSignRecordsAfterCursor(
+    letterFilteredSignRecords,
+    query.cursor,
+  );
+
+  return cursorFilteredSignRecords.slice(0, query.limit + 1);
 }

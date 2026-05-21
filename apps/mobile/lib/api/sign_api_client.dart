@@ -114,6 +114,8 @@ class SignApiClient {
     required SearchLanguage language,
     String? cursor,
     int limit = 20,
+    String? letter,
+    SearchLanguage? letterLanguage,
   }) async {
     final queryParameters = <String, String>{
       'lang': language.apiCode,
@@ -122,6 +124,11 @@ class SignApiClient {
 
     if (cursor != null) {
       queryParameters['cursor'] = cursor;
+    }
+
+    if (letter != null && letterLanguage != null) {
+      queryParameters['letter'] = letter;
+      queryParameters['letterLang'] = letterLanguage.apiCode;
     }
 
     final uri = Uri.parse('$baseUrl/signs').replace(

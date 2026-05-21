@@ -3,6 +3,7 @@ import { describe, test } from "node:test";
 import {
   buildSignBrowsePage,
   filterSignRecordsAfterCursor,
+  prepareBrowseSignRecords,
 } from "../src/data/sign-browse-pagination.js";
 import type { SignRecord } from "../src/types/sign-record.js";
 
@@ -61,5 +62,31 @@ describe("sign-browse-pagination", () => {
     assert.equal(page.items.length, 2);
     assert.equal(page.hasMore, true);
     assert.equal(page.nextCursor, "mother");
+  });
+
+  test("prepareBrowseSignRecords filters by Nepali vowel", () => {
+    const pageItems = prepareBrowseSignRecords(sampleSignRecords, {
+      limit: 10,
+      letter: "आ",
+      letterLanguage: "ne",
+    });
+
+    assert.deepEqual(
+      pageItems.map((sign) => sign.id),
+      ["mother"],
+    );
+  });
+
+  test("prepareBrowseSignRecords filters by English letter", () => {
+    const pageItems = prepareBrowseSignRecords(sampleSignRecords, {
+      limit: 10,
+      letter: "h",
+      letterLanguage: "en",
+    });
+
+    assert.deepEqual(
+      pageItems.map((sign) => sign.id),
+      ["hello"],
+    );
   });
 });

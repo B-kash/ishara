@@ -9,6 +9,25 @@
   "searchLanguageNepali": "नेपाली",
   "browseDictionaryTitle": "शब्दकोश हेर्नुहोस्",
   "browseDictionaryAction": "सबै शब्दहरू हेर्नुहोस्",
+  "browseDictionarySearchHint": "शब्दकोशमा खोज्नुहोस्",
+  "jumpToLetterTitle": "अक्षरमा जानुहोस्",
+  "jumpToLetterHint": "अक्षर थिचेर त्यहीबाट हेर्नुहोस्",
+  "jumpToLetterSelected": "{language}: {letter}",
+  "@jumpToLetterSelected": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      },
+      "letter": {
+        "type": "String"
+      }
+    }
+  },
+  "englishLettersLabel": "अङ्ग्रेजी",
+  "nepaliLettersLabel": "नेपाली",
+  "nepaliVowelsLabel": "नेपाली स्वर",
+  "nepaliConsonantsLabel": "नेपाली व्यञ्जन",
+  "loadMore": "थप लोड गर्नुहोस्",
   "categoriesTitle": "वर्गहरू",
   "couldNotLoadCategories": "वर्गहरू लोड गर्न सकिएन",
   "noCategoriesYet": "अहिले कुनै वर्ग छैन।",

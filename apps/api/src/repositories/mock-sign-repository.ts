@@ -5,7 +5,7 @@ import type { Category } from "../types/api-responses.js";
 import { categoryNameToId } from "../data/category-slug.js";
 import {
   buildSignBrowsePage,
-  filterSignRecordsAfterCursor,
+  prepareBrowseSignRecords,
 } from "../data/sign-browse-pagination.js";
 import {
   signRecordMatchesBilingualSearch,
@@ -64,14 +64,12 @@ export class MockSignRepository implements SignRepository {
   async listSignRecordsPage(
     options: ListSignRecordsPageOptions,
   ): Promise<SignBrowsePage> {
-    const sortedSignRecords = [...this.signRecords].sort((left, right) =>
-      left.id.localeCompare(right.id),
-    );
-    const filteredSignRecords = filterSignRecordsAfterCursor(
-      sortedSignRecords,
-      options.cursor,
-    );
-    const candidatePage = filteredSignRecords.slice(0, options.limit + 1);
+    const candidatePage = prepareBrowseSignRecords(this.signRecords, {
+      cursor: options.cursor,
+      limit: options.limit,
+      letter: options.letter,
+      letterLanguage: options.letterLanguage,
+    });
 
     return buildSignBrowsePage(candidatePage, options.limit);
   }

@@ -1,0 +1,96 @@
+/// English A–Z and Nepali alphabet (vowels + क–ज्ञ) for dictionary letter jump.
+class DictionaryAlphabet {
+  DictionaryAlphabet._();
+
+  static const List<String> englishLetters = [
+    'a',
+    'b',
+    'c',
+    'd',
+    'e',
+    'f',
+    'g',
+    'h',
+    'i',
+    'j',
+    'k',
+    'l',
+    'm',
+    'n',
+    'o',
+    'p',
+    'q',
+    'r',
+    's',
+    't',
+    'u',
+    'v',
+    'w',
+    'x',
+    'y',
+    'z',
+  ];
+
+  /// Nepali swaras (vowels).
+  static const List<String> nepaliVowelLetters = [
+    'अ',
+    'आ',
+    'इ',
+    'ई',
+    'उ',
+    'ऊ',
+    'ए',
+    'ऐ',
+    'ओ',
+    'औ',
+    'ओं',
+    'अं',
+    'अः',
+    'ऋ',
+  ];
+
+  /// Nepali vyanjan (consonants) from क through ज्ञ.
+  static const List<String> nepaliConsonantLetters = [
+    'क',
+    'ख',
+    'ग',
+    'घ',
+    'ङ',
+    'च',
+    'छ',
+    'ज',
+    'झ',
+    'ञ',
+    'ट',
+    'ठ',
+    'ड',
+    'ढ',
+    'ण',
+    'त',
+    'थ',
+    'द',
+    'ध',
+    'न',
+    'प',
+    'फ',
+    'ब',
+    'भ',
+    'म',
+    'य',
+    'र',
+    'ल',
+    'व',
+    'श',
+    'ष',
+    'स',
+    'ह',
+    'क्ष',
+    'त्र',
+    'ज्ञ',
+  ];
+
+  static const List<String> nepaliLetters = [
+    ...nepaliVowelLetters,
+    ...nepaliConsonantLetters,
+  ];
+}

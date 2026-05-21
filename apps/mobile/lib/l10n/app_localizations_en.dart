@@ -36,6 +36,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get browseDictionaryAction => 'Browse all words';
 
   @override
+  String get browseDictionarySearchHint => 'Search dictionary';
+
+  @override
+  String get jumpToLetterTitle => 'Jump to letter';
+
+  @override
+  String get jumpToLetterHint => 'Tap a letter to browse from that point';
+
+  @override
+  String jumpToLetterSelected(String language, String letter) {
+    return '$language: $letter';
+  }
+
+  @override
+  String get englishLettersLabel => 'English';
+
+  @override
+  String get nepaliLettersLabel => 'Nepali';
+
+  @override
+  String get nepaliVowelsLabel => 'Nepali vowels';
+
+  @override
+  String get nepaliConsonantsLabel => 'Nepali consonants';
+
+  @override
+  String get loadMore => 'Load more';
+
+  @override
   String get categoriesTitle => 'Categories';
 
   @override

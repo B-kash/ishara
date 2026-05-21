@@ -152,6 +152,60 @@ abstract class AppLocalizations {
   /// **'Browse all words'**
   String get browseDictionaryAction;
 
+  /// No description provided for @browseDictionarySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search dictionary'**
+  String get browseDictionarySearchHint;
+
+  /// No description provided for @jumpToLetterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to letter'**
+  String get jumpToLetterTitle;
+
+  /// No description provided for @jumpToLetterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a letter to browse from that point'**
+  String get jumpToLetterHint;
+
+  /// No description provided for @jumpToLetterSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{language}: {letter}'**
+  String jumpToLetterSelected(String language, String letter);
+
+  /// No description provided for @englishLettersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get englishLettersLabel;
+
+  /// No description provided for @nepaliLettersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nepali'**
+  String get nepaliLettersLabel;
+
+  /// No description provided for @nepaliVowelsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nepali vowels'**
+  String get nepaliVowelsLabel;
+
+  /// No description provided for @nepaliConsonantsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nepali consonants'**
+  String get nepaliConsonantsLabel;
+
+  /// No description provided for @loadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get loadMore;
+
   /// No description provided for @categoriesTitle.
   ///
   /// In en, this message translates to:
