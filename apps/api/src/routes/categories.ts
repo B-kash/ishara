@@ -1,9 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import {
-  getAllCategories,
-  getCategoryById,
-  getSignRecordsByCategoryId,
-} from "../data/category-repository.js";
+import { getSignRepository } from "../repositories/active-sign-repository.js";
 import { parseSearchLanguage } from "../data/sign-search.js";
 import { toSignSearchResult } from "../mappers/sign-response.js";
 import type { ApiErrorResponse } from "../types/api-responses.js";
@@ -19,7 +15,9 @@ function getLanguageParam(request: FastifyRequest): string | undefined {
 
 export async function categoryRoutes(server: FastifyInstance) {
   server.get("/categories", async () => {
-    return { items: getAllCategories() };
+    const signRepository = getSignRepository();
+    const categories = await signRepository.getAllCategories();
+    return { items: categories };
   });
 
   server.get("/categories/:id/signs", async (request, reply) => {
@@ -34,13 +32,15 @@ export async function categoryRoutes(server: FastifyInstance) {
       return reply.status(400).send(errorBody);
     }
 
-    const category = getCategoryById(categoryId);
+    const signRepository = getSignRepository();
+    const category = await signRepository.getCategoryById(categoryId);
     if (!category) {
       const errorBody: ApiErrorResponse = { error: "Category not found" };
       return reply.status(404).send(errorBody);
     }
 
-    const signRecords = getSignRecordsByCategoryId(categoryId);
+    const signRecords =
+      await signRepository.getSignRecordsByCategoryId(categoryId);
     const items = (signRecords ?? []).map((signRecord) =>
       toSignSearchResult(signRecord, searchLanguage),
     );

@@ -1,0 +1,7 @@
+-- Prefer npm scripts (tracks applied files):
+--   npm run db:migrate
+--   npm run db:seed
+--
+-- Or with psql:
+--   \ir migrations/001_initial_schema.sql
+--   \ir seeds/001_mock_signs.sql

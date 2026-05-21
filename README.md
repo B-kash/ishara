@@ -27,6 +27,26 @@ docs/
 
 Mock dictionary data for the API lives in `data/mock-signs.json`.
 
+Copy environment settings when needed:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `DATA_SOURCE` | `mock` | `mock` = JSON file, `postgres` = PostgreSQL |
+| `DATABASE_URL` | — | Required when `DATA_SOURCE=postgres` |
+
+See [Database plan](docs/database.md) for creating a local `ishara` database.
+
+PostgreSQL setup (after `DATABASE_URL` is in `.env`):
+
+```bash
+npm run db:migrate   # runs new migrations only
+npm run db:seed      # clears and reloads seed data (safe to re-run)
+```
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 20+ (22 recommended)
@@ -171,3 +191,4 @@ flutter test
 
 - [Product brief](docs/product.md)
 - [Architecture](docs/architecture.md)
+- [Database plan](docs/database.md) (Supabase PostgreSQL — not wired up yet)

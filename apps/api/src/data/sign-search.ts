@@ -1,5 +1,4 @@
-import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
-import { getAllSignRecords } from "./sign-repository.js";
+import type { SearchLanguageCode } from "../types/sign-record.js";
 
 export function parseSearchLanguage(
   languageInput: string | undefined,
@@ -12,22 +11,4 @@ export function parseSearchLanguage(
     return "ne";
   }
   return null;
-}
-
-export function searchSignRecords(
-  searchQuery: string,
-  language: SearchLanguageCode,
-): SignRecord[] {
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-  if (!normalizedQuery) {
-    return [];
-  }
-
-  return getAllSignRecords().filter((sign) => {
-    const wordText =
-      language === "en"
-        ? sign.englishWord.toLowerCase()
-        : sign.nepaliWord.toLowerCase();
-    return wordText.includes(normalizedQuery);
-  });
 }

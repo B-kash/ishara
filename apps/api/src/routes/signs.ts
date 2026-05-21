@@ -1,9 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { getSignById } from "../data/sign-repository.js";
-import {
-  parseSearchLanguage,
-  searchSignRecords,
-} from "../data/sign-search.js";
+import { getSignRepository } from "../repositories/active-sign-repository.js";
+import { parseSearchLanguage } from "../data/sign-search.js";
 import { toSignDetail, toSignSearchResult } from "../mappers/sign-response.js";
 import type { ApiErrorResponse } from "../types/api-responses.js";
 
@@ -41,7 +38,11 @@ export async function signRoutes(server: FastifyInstance) {
       return reply.status(400).send(errorBody);
     }
 
-    const matchedRecords = searchSignRecords(searchQuery, searchLanguage);
+    const signRepository = getSignRepository();
+    const matchedRecords = await signRepository.searchSignRecords(
+      searchQuery,
+      searchLanguage,
+    );
     const items = matchedRecords.map((signRecord) =>
       toSignSearchResult(signRecord, searchLanguage),
     );
@@ -51,7 +52,8 @@ export async function signRoutes(server: FastifyInstance) {
 
   server.get("/signs/:id", async (request, reply) => {
     const { id: signId } = request.params as SignRouteParams;
-    const signRecord = getSignById(signId);
+    const signRepository = getSignRepository();
+    const signRecord = await signRepository.getSignById(signId);
 
     if (!signRecord) {
       const errorBody: ApiErrorResponse = { error: "Sign not found" };

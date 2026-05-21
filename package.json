@@ -5,9 +5,15 @@
     "dev": "npm run dev --workspace=@ishara/api",
     "api:dev": "npm run dev --workspace=@ishara/api",
     "api:build": "npm run build --workspace=@ishara/api",
-    "api:start": "npm run start --workspace=@ishara/api"
+    "api:start": "npm run start --workspace=@ishara/api",
+    "db:migrate": "node scripts/db-migrate.mjs",
+    "db:seed": "node scripts/db-seed.mjs"
   },
   "workspaces": [
     "apps/api"
-  ]
+  ],
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "pg": "^8.16.0"
+  }
 }

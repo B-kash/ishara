@@ -26,6 +26,10 @@ User searches word
 
 Sign records live in `data/mock-signs.json`. The API reads this file in memory. The Flutter app loads signs over HTTP from the API.
 
+## Database
+
+PostgreSQL schema is in `supabase/schema.sql`. The API uses `DATA_SOURCE=mock` by default or `DATA_SOURCE=postgres` with `DATABASE_URL`. See [database.md](database.md).
+
 ## MVP API
 
 - GET /health
