@@ -10,4 +10,6 @@ export interface SignRecord {
   category: string;
   /** Future CDN URL for the sign video (metadata only). */
   videoUrl: string | null;
+  /** Preview image when video is missing or before playback. */
+  thumbnailUrl: string | null;
 }

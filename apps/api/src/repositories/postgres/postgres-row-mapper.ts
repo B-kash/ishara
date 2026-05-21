@@ -9,6 +9,7 @@ export interface SignRecordRow {
   meaning_nepali: string;
   category: string;
   video_url: string | null;
+  thumbnail_url: string | null;
 }
 
 export function mapRowToSignRecord(row: SignRecordRow): SignRecord {
@@ -21,6 +22,7 @@ export function mapRowToSignRecord(row: SignRecordRow): SignRecord {
     meaningNepali: row.meaning_nepali,
     category: row.category,
     videoUrl: row.video_url,
+    thumbnailUrl: row.thumbnail_url,
   };
 }
 
@@ -33,7 +35,8 @@ export const signRecordSelectSql = `
     concepts.meaning_english as meaning_english,
     concepts.meaning_nepali as meaning_nepali,
     categories.name as category,
-    signs.video_url as video_url
+    signs.video_url as video_url,
+    signs.thumbnail_url as thumbnail_url
   from signs
   join concepts on concepts.id = signs.concept_id
   join categories on categories.id = concepts.category_id

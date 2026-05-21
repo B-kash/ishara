@@ -35,6 +35,7 @@ export function toSignDetail(signRecord: SignRecord): SignDetail {
     category: signRecord.category,
     meaning: signRecord.meaningEnglish,
     videoUrl: signRecord.videoUrl,
-    thumbnailUrl: null,
+    thumbnailUrl: signRecord.thumbnailUrl,
+    videoDurationSeconds: null,
   };
 }

@@ -1,64 +1,85 @@
 import 'package:flutter/material.dart';
 
-import '../models/sign_search_result.dart';
+import '../api/sign_api_client.dart';
+import '../models/sign_detail.dart';
+import '../state/async_view_state.dart';
+import '../widgets/async_state_body.dart';
+import '../widgets/sign_media_panel.dart';
 
-class SignDetailScreen extends StatelessWidget {
-  const SignDetailScreen({super.key, required this.sign});
+class SignDetailScreen extends StatefulWidget {
+  const SignDetailScreen({
+    super.key,
+    required this.signApiClient,
+    required this.signId,
+  });
 
-  final SignSearchResult sign;
+  final SignApiClient signApiClient;
+  final String signId;
+
+  @override
+  State<SignDetailScreen> createState() => _SignDetailScreenState();
+}
+
+class _SignDetailScreenState extends State<SignDetailScreen> {
+  AsyncViewState<SignDetail> _detailState = AsyncViewState.loading();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSignDetail();
+  }
+
+  Future<void> _loadSignDetail() async {
+    setState(() {
+      _detailState = AsyncViewState.loading();
+    });
+
+    try {
+      final signDetail = await widget.signApiClient.getSignById(widget.signId);
+      setState(() {
+        _detailState = AsyncViewState.success(signDetail);
+      });
+    } catch (error) {
+      setState(() {
+        _detailState = AsyncViewState.error(error.toString());
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final appBarTitle = _detailState.data?.englishWord ?? 'Sign detail';
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(sign.englishWord),
+        title: Text(appBarTitle),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
+      body: AsyncStateBody<SignDetail>(
+        state: _detailState,
+        onRetry: _loadSignDetail,
+        errorTitle: 'Could not load sign',
+        emptyMessage: 'Sign not found.',
+        successBuilder: (context, signDetail) {
+          return ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              SignMediaPanel(signDetail: signDetail),
+              const SizedBox(height: 24),
+              _DetailRow(label: 'English', value: signDetail.englishWord),
+              const SizedBox(height: 12),
+              _DetailRow(label: 'Nepali', value: signDetail.nepaliWord),
+              const SizedBox(height: 12),
+              _DetailRow(label: 'Category', value: signDetail.category),
+              const SizedBox(height: 20),
+              Text(
+                'Meaning',
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.play_circle_outline,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Sign video placeholder',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          _DetailRow(label: 'English', value: sign.englishWord),
-          const SizedBox(height: 12),
-          _DetailRow(label: 'Nepali', value: sign.nepaliWord),
-          const SizedBox(height: 12),
-          _DetailRow(label: 'Category', value: sign.category),
-          const SizedBox(height: 20),
-          Text(
-            'Meaning',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(sign.meaning),
-        ],
+              const SizedBox(height: 8),
+              Text(signDetail.meaning),
+            ],
+          );
+        },
       ),
     );
   }

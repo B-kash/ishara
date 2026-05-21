@@ -27,6 +27,7 @@ export interface SignDetail {
   meaning: string;
   videoUrl: string | null;
   thumbnailUrl: string | null;
+  videoDurationSeconds: number | null;
 }
 
 export type ApiErrorCode =

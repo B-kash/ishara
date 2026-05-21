@@ -13,8 +13,19 @@ const mockSignsFilePath = join(
   "../../../../data/mock-signs.json",
 );
 
+type MockSignRecordJson = Omit<SignRecord, "thumbnailUrl"> & {
+  thumbnailUrl?: string | null;
+};
+
 function loadMockSignRecords(): SignRecord[] {
-  return JSON.parse(readFileSync(mockSignsFilePath, "utf8")) as SignRecord[];
+  const rawRecords = JSON.parse(
+    readFileSync(mockSignsFilePath, "utf8"),
+  ) as MockSignRecordJson[];
+
+  return rawRecords.map((signRecord) => ({
+    ...signRecord,
+    thumbnailUrl: signRecord.thumbnailUrl ?? null,
+  }));
 }
 
 function buildCategoryList(signRecords: SignRecord[]): Category[] {

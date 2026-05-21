@@ -1,6 +1,7 @@
 import { config as loadDotenv } from "dotenv";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import fastifyStatic from "@fastify/static";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { loadConfig } from "./config/env.js";
@@ -34,6 +35,13 @@ server.setErrorHandler((error, request, reply) => {
 });
 
 await server.register(cors, { origin: true });
+
+const mediaDirectory = join(apiDirectory, "../../../data/media");
+await server.register(fastifyStatic, {
+  root: mediaDirectory,
+  prefix: "/media/",
+  decorateReply: false,
+});
 
 server.get("/health", async () => {
   return {

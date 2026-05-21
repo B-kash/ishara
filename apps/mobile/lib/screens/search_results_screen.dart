@@ -82,7 +82,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (context) => SignDetailScreen(sign: sign),
+                      builder: (context) => SignDetailScreen(
+                        signApiClient: widget.signApiClient,
+                        signId: sign.id,
+                      ),
                     ),
                   );
                 },

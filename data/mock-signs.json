@@ -7,7 +7,8 @@
     "meaningEnglish": "A greeting used when meeting someone.",
     "meaningNepali": "कसैलाई भेट्दा प्रयोग गरिने अभिवादन।",
     "category": "Greetings",
-    "videoUrl": null
+    "videoUrl": "http://127.0.0.1:3000/media/hello.mp4",
+    "thumbnailUrl": null
   },
   {
     "id": "thank-you",
@@ -17,7 +18,8 @@
     "meaningEnglish": "Expression of gratitude.",
     "meaningNepali": "कृतज्ञता व्यक्त गर्ने शब्द।",
     "category": "Greetings",
-    "videoUrl": null
+    "videoUrl": null,
+    "thumbnailUrl": null
   },
   {
     "id": "water",
@@ -27,7 +29,8 @@
     "meaningEnglish": "Clear liquid essential for life.",
     "meaningNepali": "जीवनको लागि आवश्यक पेय पदार्थ।",
     "category": "Food & Drink",
-    "videoUrl": null
+    "videoUrl": null,
+    "thumbnailUrl": null
   },
   {
     "id": "rice",
@@ -37,7 +40,8 @@
     "meaningEnglish": "Staple grain eaten daily in Nepal.",
     "meaningNepali": "नेपालमा दैनिक खाने मुख्य अन्न।",
     "category": "Food & Drink",
-    "videoUrl": null
+    "videoUrl": null,
+    "thumbnailUrl": null
   },
   {
     "id": "mother",
@@ -47,7 +51,8 @@
     "meaningEnglish": "A female parent.",
     "meaningNepali": "महिला अभिभावक।",
     "category": "Family",
-    "videoUrl": null
+    "videoUrl": null,
+    "thumbnailUrl": null
   },
   {
     "id": "father",
@@ -57,7 +62,8 @@
     "meaningEnglish": "A male parent.",
     "meaningNepali": "पुरुष अभिभावक।",
     "category": "Family",
-    "videoUrl": null
+    "videoUrl": null,
+    "thumbnailUrl": null
   },
   {
     "id": "school",
@@ -67,7 +73,8 @@
     "meaningEnglish": "A place where children learn.",
     "meaningNepali": "बालबालिकाले पढ्ने ठाउँ।",
     "category": "Education",
-    "videoUrl": null
+    "videoUrl": null,
+    "thumbnailUrl": null
   },
   {
     "id": "friend",
@@ -77,6 +84,7 @@
     "meaningEnglish": "A person you know and like.",
     "meaningNepali": "तपाईंले चिन्ने र मन पराउने व्यक्ति।",
     "category": "People",
-    "videoUrl": null
+    "videoUrl": null,
+    "thumbnailUrl": null
   }
 ]

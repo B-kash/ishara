@@ -77,7 +77,12 @@ insert into words (concept_id, language, word) values
   ('concept-friend', 'ne', 'साथी');
 
 insert into signs (id, concept_id, video_url, thumbnail_url) values
-  ('hello', 'concept-hello', null, null),
+  (
+    'hello',
+    'concept-hello',
+    'http://127.0.0.1:3000/media/hello.mp4',
+    null
+  ),
   ('thank-you', 'concept-thank-you', null, null),
   ('water', 'concept-water', null, null),
   ('rice', 'concept-rice', null, null),
