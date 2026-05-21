@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../api/sign_api_client.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/sign_detail.dart';
 import '../state/async_view_state.dart';
 import '../widgets/async_state_body.dart';
@@ -36,19 +37,31 @@ class _SignDetailScreenState extends State<SignDetailScreen> {
 
     try {
       final signDetail = await widget.signApiClient.getSignById(widget.signId);
+
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
         _detailState = AsyncViewState.success(signDetail);
       });
     } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
-        _detailState = AsyncViewState.error(error.toString());
+        _detailState = AsyncViewState.error(
+          localizeErrorMessage(context, error),
+        );
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final appBarTitle = _detailState.data?.englishWord ?? 'Sign detail';
+    final l10n = context.l10n;
+    final appBarTitle = _detailState.data?.englishWord ?? l10n.signDetailTitle;
 
     return Scaffold(
       appBar: AppBar(
@@ -57,22 +70,31 @@ class _SignDetailScreenState extends State<SignDetailScreen> {
       body: AsyncStateBody<SignDetail>(
         state: _detailState,
         onRetry: _loadSignDetail,
-        errorTitle: 'Could not load sign',
-        emptyMessage: 'Sign not found.',
+        errorTitle: l10n.couldNotLoadSign,
+        emptyMessage: l10n.signNotFound,
         successBuilder: (context, signDetail) {
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
               SignMediaPanel(signDetail: signDetail),
               const SizedBox(height: 24),
-              _DetailRow(label: 'English', value: signDetail.englishWord),
+              _DetailRow(
+                label: l10n.detailEnglish,
+                value: signDetail.englishWord,
+              ),
               const SizedBox(height: 12),
-              _DetailRow(label: 'Nepali', value: signDetail.nepaliWord),
+              _DetailRow(
+                label: l10n.detailNepali,
+                value: signDetail.nepaliWord,
+              ),
               const SizedBox(height: 12),
-              _DetailRow(label: 'Category', value: signDetail.category),
+              _DetailRow(
+                label: l10n.detailCategory,
+                value: signDetail.category,
+              ),
               const SizedBox(height: 20),
               Text(
-                'Meaning',
+                l10n.detailMeaning,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),

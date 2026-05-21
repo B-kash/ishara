@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../api/sign_api_client.dart';
+import '../l10n/l10n_extensions.dart';
+import '../locale/locale_controller.dart';
 import '../models/category.dart';
 import '../models/search_language.dart';
 import '../state/async_view_state.dart';
 import '../theme/theme_controller.dart';
+import '../widgets/locale_menu_button.dart';
 import '../widgets/theme_menu_button.dart';
 import 'category_results_screen.dart';
 import 'search_results_screen.dart';
@@ -13,11 +16,13 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     required this.signApiClient,
     required this.themeController,
+    required this.localeController,
     super.key,
   });
 
   final SignApiClient signApiClient;
   final ThemeController themeController;
+  final LocaleController localeController;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -47,6 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final categories = await widget.signApiClient.getCategories();
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
         if (categories.isEmpty) {
           _categoriesState = AsyncViewState.empty();
@@ -55,8 +64,14 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
     } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
-        _categoriesState = AsyncViewState.error(error.toString());
+        _categoriesState = AsyncViewState.error(
+          localizeErrorMessage(context, error),
+        );
       });
     }
   }
@@ -91,6 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCategoriesSection(BuildContext context) {
+    final l10n = context.l10n;
+
     switch (_categoriesState.status) {
       case AsyncViewStatus.idle:
         return const SizedBox.shrink();
@@ -104,14 +121,14 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Could not load categories',
+              l10n.couldNotLoadCategories,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              _categoriesState.errorMessage ?? 'Something went wrong.',
+              _categoriesState.errorMessage ?? l10n.somethingWentWrong,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -119,13 +136,13 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 8),
             TextButton(
               onPressed: _loadCategories,
-              child: const Text('Try again'),
+              child: Text(l10n.tryAgain),
             ),
           ],
         );
       case AsyncViewStatus.empty:
         return Text(
-          'No categories yet.',
+          l10n.noCategoriesYet,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -148,6 +165,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -158,18 +177,20 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'Ishara',
+                    l10n.appTitle,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                 ),
+                LocaleMenuButton(localeController: widget.localeController),
+                const SizedBox(width: 4),
                 ThemeMenuButton(themeController: widget.themeController),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              'Nepali Sign Language dictionary',
+              l10n.appSubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -179,8 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: _language == SearchLanguage.english
-                    ? 'Search in English'
-                    : 'नेपालीमा खोज्नुहोस्',
+                    ? l10n.searchHintEnglish
+                    : l10n.searchHintNepali,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.arrow_forward),
@@ -193,14 +214,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             SegmentedButton<SearchLanguage>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: SearchLanguage.english,
-                  label: Text('English'),
+                  label: Text(l10n.searchLanguageEnglish),
                 ),
                 ButtonSegment(
                   value: SearchLanguage.nepali,
-                  label: Text('Nepali'),
+                  label: Text(l10n.searchLanguageNepali),
                 ),
               ],
               selected: {_language},
@@ -212,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Categories',
+              l10n.categoriesTitle,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),

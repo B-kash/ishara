@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+import '../l10n/l10n_extensions.dart';
+
 /// Plays a remote sign video (MP4). Used on web, Android, and iOS.
 class SignVideoPlayer extends StatefulWidget {
   const SignVideoPlayer({
@@ -201,6 +203,8 @@ class _VideoErrorPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -214,7 +218,7 @@ class _VideoErrorPanel extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Could not load video',
+              l10n.couldNotLoadVideo,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -222,7 +226,7 @@ class _VideoErrorPanel extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Check that the API is running and try again.',
+              l10n.videoCheckApiRunning,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -231,7 +235,7 @@ class _VideoErrorPanel extends StatelessWidget {
             const SizedBox(height: 12),
             TextButton(
               onPressed: onRetry,
-              child: const Text('Try again'),
+              child: Text(l10n.tryAgain),
             ),
           ],
         ),

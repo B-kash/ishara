@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../models/sign_detail.dart';
 import 'sign_video_player.dart';
 
@@ -48,6 +49,8 @@ class SignMediaPanel extends StatelessWidget {
 class _NoMediaPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -58,7 +61,7 @@ class _NoMediaPanel extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Sign video coming soon',
+          l10n.signVideoComingSoon,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -75,6 +78,8 @@ class _ThumbnailPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -103,7 +108,7 @@ class _ThumbnailPanel extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               child: Text(
-                'Preview image',
+                l10n.previewImage,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: Colors.white,
                     ),

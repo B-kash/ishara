@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../api/sign_api_client.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/search_language.dart';
 import '../models/sign_search_result.dart';
 import '../state/async_view_state.dart';
@@ -44,6 +45,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         language: widget.language,
       );
 
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
         if (results.isEmpty) {
           _resultsState = AsyncViewState.empty();
@@ -52,22 +57,30 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         }
       });
     } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
-        _resultsState = AsyncViewState.error(error.toString());
+        _resultsState = AsyncViewState.error(
+          localizeErrorMessage(context, error),
+        );
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Results for "${widget.query}"'),
+        title: Text(l10n.resultsFor(widget.query)),
       ),
       body: AsyncStateBody<List<SignSearchResult>>(
         state: _resultsState,
         onRetry: _loadResults,
-        emptyMessage: 'No signs found. Try another word or category.',
+        emptyMessage: l10n.noSignsFound,
         successBuilder: (context, results) {
           return ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: 8),

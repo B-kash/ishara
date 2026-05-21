@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ishara/api/sign_api_client.dart';
+import 'package:ishara/locale/locale_controller.dart';
 import 'package:ishara/main.dart';
 import 'package:ishara/theme/ishara_theme.dart';
 import 'package:ishara/theme/theme_controller.dart';
@@ -22,6 +23,7 @@ Widget buildTestApp(SignApiClient signApiClient) {
   return IsharaApp(
     signApiClient: signApiClient,
     themeController: ThemeController(),
+    localeController: LocaleController(),
   );
 }
 
@@ -192,6 +194,7 @@ void main() {
       IsharaApp(
         signApiClient: signApiClient,
         themeController: themeController,
+        localeController: LocaleController(),
       ),
     );
     await tester.pump();

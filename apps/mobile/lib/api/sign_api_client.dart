@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
@@ -8,13 +9,42 @@ import '../models/search_language.dart';
 import '../models/sign_detail.dart';
 import '../models/sign_search_result.dart';
 
-class SignApiException implements Exception {
-  SignApiException(this.message);
+enum SignApiErrorKind {
+  categoriesLoadFailed,
+  categoryNotFound,
+  categorySignsLoadFailed,
+  searchFailed,
+  signNotFound,
+  signLoadFailed,
+}
 
-  final String message;
+class SignApiException implements Exception {
+  SignApiException(this.kind, {this.statusCode});
+
+  final SignApiErrorKind kind;
+  final int? statusCode;
+
+  String localize(AppLocalizations l10n) {
+    final statusCode = this.statusCode ?? 0;
+
+    switch (kind) {
+      case SignApiErrorKind.categoriesLoadFailed:
+        return l10n.apiCategoriesLoadFailed(statusCode);
+      case SignApiErrorKind.categoryNotFound:
+        return l10n.apiCategoryNotFound;
+      case SignApiErrorKind.categorySignsLoadFailed:
+        return l10n.apiCategorySignsLoadFailed(statusCode);
+      case SignApiErrorKind.searchFailed:
+        return l10n.apiSearchFailed(statusCode);
+      case SignApiErrorKind.signNotFound:
+        return l10n.apiSignNotFound;
+      case SignApiErrorKind.signLoadFailed:
+        return l10n.apiSignLoadFailed(statusCode);
+    }
+  }
 
   @override
-  String toString() => message;
+  String toString() => kind.name;
 }
 
 class SignApiClient {
@@ -33,7 +63,8 @@ class SignApiClient {
 
     if (response.statusCode != 200) {
       throw SignApiException(
-        'Could not load categories (${response.statusCode}). Is the API running?',
+        SignApiErrorKind.categoriesLoadFailed,
+        statusCode: response.statusCode,
       );
     }
 
@@ -56,11 +87,12 @@ class SignApiClient {
     final response = await httpClient.get(uri);
 
     if (response.statusCode == 404) {
-      throw SignApiException('Category not found');
+      throw SignApiException(SignApiErrorKind.categoryNotFound);
     }
     if (response.statusCode != 200) {
       throw SignApiException(
-        'Could not load category signs (${response.statusCode}). Is the API running?',
+        SignApiErrorKind.categorySignsLoadFailed,
+        statusCode: response.statusCode,
       );
     }
 
@@ -90,7 +122,8 @@ class SignApiClient {
 
     if (response.statusCode != 200) {
       throw SignApiException(
-        'Search failed (${response.statusCode}). Is the API running?',
+        SignApiErrorKind.searchFailed,
+        statusCode: response.statusCode,
       );
     }
 
@@ -109,11 +142,12 @@ class SignApiClient {
     final response = await httpClient.get(uri);
 
     if (response.statusCode == 404) {
-      throw SignApiException('Sign not found');
+      throw SignApiException(SignApiErrorKind.signNotFound);
     }
     if (response.statusCode != 200) {
       throw SignApiException(
-        'Could not load sign (${response.statusCode}). Is the API running?',
+        SignApiErrorKind.signLoadFailed,
+        statusCode: response.statusCode,
       );
     }
 

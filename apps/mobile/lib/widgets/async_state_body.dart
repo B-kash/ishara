@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../state/async_view_state.dart';
 
 class AsyncStateBody<T> extends StatelessWidget {
@@ -10,8 +11,8 @@ class AsyncStateBody<T> extends StatelessWidget {
     required this.successBuilder,
     this.idleBuilder,
     this.loadingBuilder,
-    this.emptyMessage = 'Nothing here yet.',
-    this.errorTitle = 'Could not reach the API',
+    this.emptyMessage,
+    this.errorTitle,
   });
 
   final AsyncViewState<T> state;
@@ -19,11 +20,13 @@ class AsyncStateBody<T> extends StatelessWidget {
   final Widget Function(BuildContext context, T data) successBuilder;
   final Widget Function(BuildContext context)? idleBuilder;
   final Widget Function(BuildContext context)? loadingBuilder;
-  final String emptyMessage;
-  final String errorTitle;
+  final String? emptyMessage;
+  final String? errorTitle;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     switch (state.status) {
       case AsyncViewStatus.idle:
         return idleBuilder?.call(context) ??
@@ -34,25 +37,25 @@ class AsyncStateBody<T> extends StatelessWidget {
       case AsyncViewStatus.error:
         return _MessagePanel(
           icon: Icons.cloud_off,
-          title: errorTitle,
-          message: state.errorMessage ?? 'Something went wrong.',
-          actionLabel: 'Try again',
+          title: errorTitle ?? l10n.couldNotReachApi,
+          message: state.errorMessage ?? l10n.somethingWentWrong,
+          actionLabel: l10n.tryAgain,
           onAction: onRetry,
         );
       case AsyncViewStatus.empty:
         return _MessagePanel(
           icon: Icons.search_off,
-          title: 'No results',
-          message: emptyMessage,
+          title: l10n.noResults,
+          message: emptyMessage ?? l10n.nothingHereYet,
         );
       case AsyncViewStatus.success:
         final data = state.data;
         if (data == null) {
           return _MessagePanel(
             icon: Icons.error_outline,
-            title: errorTitle,
-            message: 'Missing data.',
-            actionLabel: 'Try again',
+            title: errorTitle ?? l10n.couldNotReachApi,
+            message: l10n.missingData,
+            actionLabel: l10n.tryAgain,
             onAction: onRetry,
           );
         }
@@ -60,8 +63,8 @@ class AsyncStateBody<T> extends StatelessWidget {
         if (data is List && data.isEmpty) {
           return _MessagePanel(
             icon: Icons.search_off,
-            title: 'No results',
-            message: emptyMessage,
+            title: l10n.noResults,
+            message: emptyMessage ?? l10n.nothingHereYet,
           );
         }
 

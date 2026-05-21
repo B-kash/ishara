@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n_extensions.dart';
 import '../theme/ishara_theme.dart';
 import '../theme/theme_controller.dart';
 
@@ -10,11 +11,13 @@ class ThemeMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return ListenableBuilder(
       listenable: themeController,
       builder: (context, child) {
         return PopupMenuButton<IsharaThemeId>(
-          tooltip: 'Choose theme',
+          tooltip: l10n.chooseTheme,
           icon: const Icon(Icons.palette_outlined),
           onSelected: themeController.setTheme,
           itemBuilder: (context) {
@@ -30,7 +33,7 @@ class ThemeMenuButton extends StatelessWidget {
                         color: themeId.seedColor,
                       ),
                       const SizedBox(width: 12),
-                      Expanded(child: Text(themeId.displayName)),
+                      Expanded(child: Text(themeId.displayName(l10n))),
                       if (themeController.currentTheme == themeId)
                         Icon(
                           Icons.check,

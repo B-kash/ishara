@@ -204,6 +204,8 @@ flutter run -d ios       # iOS (macOS with Xcode)
 
 **Themes:** palette icon on the home screen (5 themes, saved locally).
 
+**App language:** globe icon — English / Nepali UI (ARB files in `apps/mobile/lib/l10n/`).
+
 Platform notes: [apps/mobile/README.md](apps/mobile/README.md)
 
 Run tests:

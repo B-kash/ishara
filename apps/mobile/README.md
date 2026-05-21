@@ -31,6 +31,16 @@ flutter run -d android --dart-define=API_BASE_URL=http://10.0.2.2:3000
 
 Tap the palette icon on the home screen to switch between **Ishara**, **Ocean**, **Forest**, **Slate**, and **Night**. Choice is saved on the device.
 
+## App language (i18n)
+
+Tap the **globe** icon to switch UI between **English** and **Nepali** (नेपाली). Strings live in `lib/l10n/app_en.arb` and `lib/l10n/app_ne.arb`. After editing ARB files, run:
+
+```bash
+flutter gen-l10n
+```
+
+Search language (English/Nepali segmented control) is separate from UI language — it controls which dictionary words the API searches.
+
 ## Build
 
 ```bash

@@ -1,0 +1,81 @@
+{
+  "@@locale": "en",
+  "appTitle": "Ishara",
+  "appSubtitle": "Nepali Sign Language dictionary",
+  "searchHintEnglish": "Search in English",
+  "searchHintNepali": "Search in Nepali",
+  "searchLanguageEnglish": "English",
+  "searchLanguageNepali": "Nepali",
+  "categoriesTitle": "Categories",
+  "couldNotLoadCategories": "Could not load categories",
+  "noCategoriesYet": "No categories yet.",
+  "tryAgain": "Try again",
+  "somethingWentWrong": "Something went wrong.",
+  "chooseTheme": "Choose theme",
+  "chooseAppLanguage": "App language",
+  "themeIshara": "Ishara",
+  "themeOcean": "Ocean",
+  "themeForest": "Forest",
+  "themeSlate": "Slate",
+  "themeNight": "Night",
+  "resultsFor": "Results for \"{query}\"",
+  "@resultsFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "noSignsFound": "No signs found. Try another word or category.",
+  "noSignsInCategory": "No signs in this category yet.",
+  "couldNotReachApi": "Could not reach the API",
+  "noResults": "No results",
+  "couldNotLoadSign": "Could not load sign",
+  "signNotFound": "Sign not found.",
+  "signDetailTitle": "Sign detail",
+  "detailEnglish": "English",
+  "detailNepali": "Nepali",
+  "detailCategory": "Category",
+  "detailMeaning": "Meaning",
+  "signVideoComingSoon": "Sign video coming soon",
+  "previewImage": "Preview image",
+  "couldNotLoadVideo": "Could not load video",
+  "videoCheckApiRunning": "Check that the API is running and try again.",
+  "videoReadyLater": "Video ready — playback in next update",
+  "missingData": "Missing data.",
+  "nothingHereYet": "Nothing here yet.",
+  "apiCategoriesLoadFailed": "Could not load categories ({statusCode}). Is the API running?",
+  "@apiCategoriesLoadFailed": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "apiCategoryNotFound": "Category not found",
+  "apiCategorySignsLoadFailed": "Could not load category signs ({statusCode}). Is the API running?",
+  "@apiCategorySignsLoadFailed": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "apiSearchFailed": "Search failed ({statusCode}). Is the API running?",
+  "@apiSearchFailed": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "apiSignNotFound": "Sign not found",
+  "apiSignLoadFailed": "Could not load sign ({statusCode}). Is the API running?",
+  "@apiSignLoadFailed": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  }
+}
