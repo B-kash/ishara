@@ -15,6 +15,7 @@ const server = await createServer({
   signRepository,
   enableMedia: true,
   logger: true,
+  corsOrigin: appConfig.corsOrigin,
 });
 
 const shutdown = async () => {

@@ -36,8 +36,11 @@ cp .env.example .env
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
+| `PORT` | `3000` | API port |
+| `HOST` | `0.0.0.0` | API bind address |
 | `DATA_SOURCE` | `mock` | `mock` = JSON file, `postgres` = PostgreSQL |
 | `DATABASE_URL` | — | Required when `DATA_SOURCE=postgres` |
+| `CORS_ORIGIN` | (allow all) | Comma-separated web app origins; set in production |
 
 See [Database plan](docs/database.md) for creating a local `ishara` database.
 
@@ -205,8 +208,14 @@ Run tests:
 flutter test
 ```
 
+## CI
+
+GitHub Actions runs on push/PR to `main` or `master`: API build + tests, Flutter analyze + tests. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
 ## Docs
 
 - [Product brief](docs/product.md)
 - [Architecture](docs/architecture.md)
-- [Database plan](docs/database.md) (Supabase PostgreSQL — not wired up yet)
+- [Database plan](docs/database.md)
+- [Deployment](docs/deployment.md)
+- [Admin plan (future)](docs/admin.md)

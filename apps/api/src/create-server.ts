@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import fastifyStatic from "@fastify/static";
 import cors from "@fastify/cors";
 import Fastify, { type FastifyInstance } from "fastify";
-import type { DataSource } from "./config/env.js";
+import type { CorsOriginSetting, DataSource } from "./config/env.js";
 import {
   databaseErrorResponse,
   internalErrorResponse,
@@ -21,13 +21,19 @@ export interface CreateServerOptions {
   signRepository: SignRepository;
   enableMedia?: boolean;
   logger?: boolean;
+  corsOrigin?: CorsOriginSetting;
 }
 
 export async function createServer(
   options: CreateServerOptions,
 ): Promise<FastifyInstance> {
-  const { dataSource, signRepository, enableMedia = false, logger = false } =
-    options;
+  const {
+    dataSource,
+    signRepository,
+    enableMedia = false,
+    logger = false,
+    corsOrigin = true,
+  } = options;
 
   setSignRepository(signRepository);
 
@@ -43,7 +49,7 @@ export async function createServer(
     return reply.status(500).send(internalErrorResponse());
   });
 
-  await server.register(cors, { origin: true });
+  await server.register(cors, { origin: corsOrigin });
 
   if (enableMedia) {
     const mediaDirectory = join(apiDirectory, "../../../data/media");

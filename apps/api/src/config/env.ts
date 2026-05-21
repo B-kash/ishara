@@ -1,10 +1,31 @@
 export type DataSource = "mock" | "postgres";
 
+export type CorsOriginSetting = boolean | string | string[];
+
 export interface AppConfig {
   dataSource: DataSource;
   databaseUrl: string | undefined;
   port: number;
   host: string;
+  corsOrigin: CorsOriginSetting;
+}
+
+function parseCorsOrigin(value: string | undefined): CorsOriginSetting {
+  const trimmedValue = value?.trim();
+  if (!trimmedValue || trimmedValue === "*") {
+    return true;
+  }
+
+  const allowedOrigins = trimmedValue
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+
+  if (allowedOrigins.length === 1) {
+    return allowedOrigins[0]!;
+  }
+
+  return allowedOrigins;
 }
 
 function parseDataSource(value: string | undefined): DataSource {
@@ -35,5 +56,6 @@ export function loadConfig(): AppConfig {
     databaseUrl,
     port: Number(process.env.PORT ?? 3000),
     host: process.env.HOST ?? "0.0.0.0",
+    corsOrigin: parseCorsOrigin(process.env.CORS_ORIGIN),
   };
 }
