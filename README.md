@@ -58,6 +58,13 @@ npm run db:import -- data/my-signs.json
 
 See [admin.md](docs/admin.md) for the future admin UI; import is the interim bulk tool.
 
+## Tests
+
+```bash
+npm test                              # API tests (mock data, no Postgres)
+cd apps/mobile && flutter test        # Flutter widget + unit tests
+```
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 20+ (22 recommended)

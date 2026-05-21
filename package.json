@@ -8,7 +8,8 @@
     "api:start": "npm run start --workspace=@ishara/api",
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:seed": "node scripts/db-seed.mjs",
-    "db:import": "node scripts/db-import.mjs"
+    "db:import": "node scripts/db-import.mjs",
+    "test": "npm run test --workspace=@ishara/api"
   },
   "workspaces": [
     "apps/api"
