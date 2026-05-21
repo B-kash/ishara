@@ -4,6 +4,11 @@ import { fileURLToPath } from "node:url";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { loadConfig } from "./config/env.js";
+import {
+  databaseErrorResponse,
+  internalErrorResponse,
+  isDatabaseError,
+} from "./errors/api-error.js";
 import { setSignRepository } from "./repositories/active-sign-repository.js";
 import { createSignRepository } from "./repositories/create-sign-repository.js";
 import { categoryRoutes } from "./routes/categories.js";
@@ -17,6 +22,16 @@ const signRepository = createSignRepository(appConfig);
 setSignRepository(signRepository);
 
 const server = Fastify({ logger: true });
+
+server.setErrorHandler((error, request, reply) => {
+  request.log.error(error);
+
+  if (isDatabaseError(error)) {
+    return reply.status(503).send(databaseErrorResponse());
+  }
+
+  return reply.status(500).send(internalErrorResponse());
+});
 
 await server.register(cors, { origin: true });
 

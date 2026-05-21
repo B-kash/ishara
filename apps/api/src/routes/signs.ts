@@ -1,8 +1,16 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
+import {
+  databaseErrorResponse,
+  notFoundErrorResponse,
+  validationErrorResponse,
+} from "../errors/api-error.js";
 import { getSignRepository } from "../repositories/active-sign-repository.js";
-import { parseSearchLanguage } from "../data/sign-search.js";
 import { toSignDetail, toSignSearchResult } from "../mappers/sign-response.js";
-import type { ApiErrorResponse } from "../types/api-responses.js";
+import {
+  validateRequiredQueryParam,
+  validateRouteId,
+  validateSearchLanguageParam,
+} from "../validation/request-validation.js";
 
 interface SignRouteParams {
   id: string;
@@ -20,46 +28,65 @@ function getLanguageParam(request: FastifyRequest): string | undefined {
 
 export async function signRoutes(server: FastifyInstance) {
   server.get("/signs/search", async (request, reply) => {
-    const searchQuery = getSearchQuery(request);
-    const languageParam = getLanguageParam(request);
-
-    if (!searchQuery?.trim()) {
-      const errorBody: ApiErrorResponse = {
-        error: "Query parameter q is required",
-      };
-      return reply.status(400).send(errorBody);
+    const searchQueryResult = validateRequiredQueryParam(
+      getSearchQuery(request),
+      "q",
+    );
+    if (!searchQueryResult.ok) {
+      return reply
+        .status(400)
+        .send(validationErrorResponse(searchQueryResult.message));
     }
 
-    const searchLanguage = parseSearchLanguage(languageParam);
-    if (!searchLanguage) {
-      const errorBody: ApiErrorResponse = {
-        error: "Query parameter lang must be en or ne",
-      };
-      return reply.status(400).send(errorBody);
+    const languageResult = validateSearchLanguageParam(
+      getLanguageParam(request),
+    );
+    if (!languageResult.ok) {
+      return reply
+        .status(400)
+        .send(validationErrorResponse(languageResult.message));
     }
 
-    const signRepository = getSignRepository();
-    const matchedRecords = await signRepository.searchSignRecords(
-      searchQuery,
-      searchLanguage,
-    );
-    const items = matchedRecords.map((signRecord) =>
-      toSignSearchResult(signRecord, searchLanguage),
-    );
+    try {
+      const signRepository = getSignRepository();
+      const matchedRecords = await signRepository.searchSignRecords(
+        searchQueryResult.value,
+        languageResult.value,
+      );
+      const items = matchedRecords.map((signRecord) =>
+        toSignSearchResult(signRecord, languageResult.value),
+      );
 
-    return { items };
+      return { items };
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(503).send(databaseErrorResponse());
+    }
   });
 
   server.get("/signs/:id", async (request, reply) => {
-    const { id: signId } = request.params as SignRouteParams;
-    const signRepository = getSignRepository();
-    const signRecord = await signRepository.getSignById(signId);
-
-    if (!signRecord) {
-      const errorBody: ApiErrorResponse = { error: "Sign not found" };
-      return reply.status(404).send(errorBody);
+    const routeParams = request.params as SignRouteParams;
+    const signIdResult = validateRouteId(routeParams.id, "Sign");
+    if (!signIdResult.ok) {
+      return reply
+        .status(400)
+        .send(validationErrorResponse(signIdResult.message));
     }
 
-    return toSignDetail(signRecord);
+    try {
+      const signRepository = getSignRepository();
+      const signRecord = await signRepository.getSignById(signIdResult.value);
+
+      if (!signRecord) {
+        return reply
+          .status(404)
+          .send(notFoundErrorResponse("Sign not found"));
+      }
+
+      return toSignDetail(signRecord);
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(503).send(databaseErrorResponse());
+    }
   });
 }

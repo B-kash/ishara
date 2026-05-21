@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Category } from "../types/api-responses.js";
 import { categoryNameToId } from "../data/category-slug.js";
+import { signRecordMatchesSearch } from "../data/sign-search-matching.js";
 import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
 import type { SignRepository } from "./sign-repository.js";
 
@@ -46,18 +47,9 @@ export class MockSignRepository implements SignRepository {
     searchQuery: string,
     language: SearchLanguageCode,
   ): Promise<SignRecord[]> {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    if (!normalizedQuery) {
-      return [];
-    }
-
-    return this.signRecords.filter((sign) => {
-      const wordText =
-        language === "en"
-          ? sign.englishWord.toLowerCase()
-          : sign.nepaliWord.toLowerCase();
-      return wordText.includes(normalizedQuery);
-    });
+    return this.signRecords.filter((sign) =>
+      signRecordMatchesSearch(sign, searchQuery, language),
+    );
   }
 
   async getAllCategories(): Promise<Category[]> {

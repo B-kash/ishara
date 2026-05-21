@@ -29,6 +29,17 @@ export interface SignDetail {
   thumbnailUrl: string | null;
 }
 
+export type ApiErrorCode =
+  | "VALIDATION_ERROR"
+  | "NOT_FOUND"
+  | "DATABASE_ERROR"
+  | "INTERNAL_ERROR";
+
+export interface ApiErrorBody {
+  code: ApiErrorCode;
+  message: string;
+}
+
 export interface ApiErrorResponse {
-  error: string;
+  error: ApiErrorBody;
 }

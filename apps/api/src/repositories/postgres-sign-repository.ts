@@ -1,4 +1,5 @@
 import type pg from "pg";
+import { buildSearchTerms } from "../data/sign-search-matching.js";
 import type { Category } from "../types/api-responses.js";
 import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
 import { createPostgresPool } from "./postgres/postgres-pool.js";
@@ -41,8 +42,8 @@ export class PostgresSignRepository implements SignRepository {
     searchQuery: string,
     language: SearchLanguageCode,
   ): Promise<SignRecord[]> {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    if (!normalizedQuery) {
+    const searchTerms = buildSearchTerms(searchQuery, language);
+    if (searchTerms.length === 0) {
       return [];
     }
 
@@ -52,10 +53,18 @@ export class PostgresSignRepository implements SignRepository {
         from words search_words
         where search_words.concept_id = concepts.id
           and search_words.language = $1
-          and lower(search_words.word) like '%' || $2 || '%'
+          and (
+            lower(search_words.word) = any($2::text[])
+            or exists (
+              select 1
+              from unnest($2::text[]) as search_term
+              where lower(search_words.word) like '%' || search_term || '%'
+                 or search_term like '%' || lower(search_words.word) || '%'
+            )
+          )
       )
       order by signs.id`,
-      [language, normalizedQuery],
+      [language, searchTerms],
     );
   }
 

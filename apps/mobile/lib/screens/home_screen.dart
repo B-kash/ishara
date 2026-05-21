@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../api/sign_api_client.dart';
 import '../models/category.dart';
 import '../models/search_language.dart';
+import '../state/async_view_state.dart';
 import 'category_results_screen.dart';
 import 'search_results_screen.dart';
 
@@ -18,12 +19,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _searchController = TextEditingController();
   SearchLanguage _language = SearchLanguage.english;
-  late Future<List<Category>> _categoriesFuture;
+  AsyncViewState<List<Category>> _categoriesState = AsyncViewState.idle();
 
   @override
   void initState() {
     super.initState();
-    _categoriesFuture = widget.signApiClient.getCategories();
+    _loadCategories();
   }
 
   @override
@@ -32,10 +33,25 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _reloadCategories() {
+  Future<void> _loadCategories() async {
     setState(() {
-      _categoriesFuture = widget.signApiClient.getCategories();
+      _categoriesState = AsyncViewState.loading();
     });
+
+    try {
+      final categories = await widget.signApiClient.getCategories();
+      setState(() {
+        if (categories.isEmpty) {
+          _categoriesState = AsyncViewState.empty();
+        } else {
+          _categoriesState = AsyncViewState.success(categories);
+        }
+      });
+    } catch (error) {
+      setState(() {
+        _categoriesState = AsyncViewState.error(error.toString());
+      });
+    }
   }
 
   void _submitSearch() {
@@ -65,6 +81,62 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildCategoriesSection(BuildContext context) {
+    switch (_categoriesState.status) {
+      case AsyncViewStatus.idle:
+        return const SizedBox.shrink();
+      case AsyncViewStatus.loading:
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: LinearProgressIndicator(),
+        );
+      case AsyncViewStatus.error:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Could not load categories',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _categoriesState.errorMessage ?? 'Something went wrong.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: _loadCategories,
+              child: const Text('Try again'),
+            ),
+          ],
+        );
+      case AsyncViewStatus.empty:
+        return Text(
+          'No categories yet.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        );
+      case AsyncViewStatus.success:
+        final categories = _categoriesState.data ?? [];
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final category in categories)
+              ActionChip(
+                label: Text(category.name),
+                onPressed: () => _openCategory(category),
+              ),
+          ],
+        );
+    }
   }
 
   @override
@@ -129,52 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
-            FutureBuilder<List<Category>>(
-              future: _categoriesFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: LinearProgressIndicator(),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Could not load categories',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: _reloadCategories,
-                        child: const Text('Try again'),
-                      ),
-                    ],
-                  );
-                }
-
-                final categories = snapshot.data ?? [];
-
-                return Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final category in categories)
-                      ActionChip(
-                        label: Text(category.name),
-                        onPressed: () => _openCategory(category),
-                      ),
-                  ],
-                );
-              },
-            ),
+            _buildCategoriesSection(context),
           ],
         ),
       ),

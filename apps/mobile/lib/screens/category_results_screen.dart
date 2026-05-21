@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../api/sign_api_client.dart';
 import '../models/search_language.dart';
 import '../models/sign_search_result.dart';
+import '../state/async_view_state.dart';
+import '../widgets/async_state_body.dart';
 import 'sign_detail_screen.dart';
 
 class CategoryResultsScreen extends StatefulWidget {
@@ -24,25 +26,38 @@ class CategoryResultsScreen extends StatefulWidget {
 }
 
 class _CategoryResultsScreenState extends State<CategoryResultsScreen> {
-  late Future<List<SignSearchResult>> _resultsFuture;
+  AsyncViewState<List<SignSearchResult>> _resultsState =
+      AsyncViewState.loading();
 
   @override
   void initState() {
     super.initState();
-    _resultsFuture = _loadResults();
+    _loadResults();
   }
 
-  Future<List<SignSearchResult>> _loadResults() {
-    return widget.signApiClient.getSignsByCategory(
-      categoryId: widget.categoryId,
-      language: widget.language,
-    );
-  }
-
-  void _retryLoad() {
+  Future<void> _loadResults() async {
     setState(() {
-      _resultsFuture = _loadResults();
+      _resultsState = AsyncViewState.loading();
     });
+
+    try {
+      final results = await widget.signApiClient.getSignsByCategory(
+        categoryId: widget.categoryId,
+        language: widget.language,
+      );
+
+      setState(() {
+        if (results.isEmpty) {
+          _resultsState = AsyncViewState.empty();
+        } else {
+          _resultsState = AsyncViewState.success(results);
+        }
+      });
+    } catch (error) {
+      setState(() {
+        _resultsState = AsyncViewState.error(error.toString());
+      });
+    }
   }
 
   @override
@@ -51,62 +66,11 @@ class _CategoryResultsScreenState extends State<CategoryResultsScreen> {
       appBar: AppBar(
         title: Text(widget.categoryName),
       ),
-      body: FutureBuilder<List<SignSearchResult>>(
-        future: _resultsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.cloud_off, size: 48),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Could not reach the API',
-                      style: Theme.of(context).textTheme.titleMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      snapshot.error.toString(),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                    const SizedBox(height: 16),
-                    FilledButton(
-                      onPressed: _retryLoad,
-                      child: const Text('Try again'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          final results = snapshot.data ?? [];
-
-          if (results.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  'No signs in this category yet.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ),
-            );
-          }
-
+      body: AsyncStateBody<List<SignSearchResult>>(
+        state: _resultsState,
+        onRetry: _loadResults,
+        emptyMessage: 'No signs in this category yet.',
+        successBuilder: (context, results) {
           return ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: results.length,
