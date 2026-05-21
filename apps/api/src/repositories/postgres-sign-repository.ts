@@ -15,6 +15,14 @@ import {
   type SignRecordRow,
 } from "./postgres/postgres-row-mapper.js";
 import type {
+  BulkSignImportResult,
+  SignImportOutcome,
+} from "../data/sign-import.js";
+import {
+  bulkImportSignRecordsWithPool,
+  importSingleSignRecordWithPool,
+} from "./postgres-sign-import.js";
+import type {
   ListSignRecordsPageOptions,
   SignRepository,
 } from "./sign-repository.js";
@@ -134,6 +142,14 @@ export class PostgresSignRepository implements SignRepository {
       "where categories.id = $1 order by signs.id",
       [categoryId],
     );
+  }
+
+  async importSignRecord(rawRecord: unknown): Promise<SignImportOutcome> {
+    return importSingleSignRecordWithPool(this.pool, rawRecord);
+  }
+
+  async bulkImportSignRecords(rawRecords: unknown[]): Promise<BulkSignImportResult> {
+    return bulkImportSignRecordsWithPool(this.pool, rawRecords);
   }
 
   async close(): Promise<void> {

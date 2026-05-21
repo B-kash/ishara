@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import fastifyStatic from "@fastify/static";
 import cors from "@fastify/cors";
 import Fastify, { type FastifyInstance } from "fastify";
+import type { AdminAuthConfig } from "./admin/admin-auth.js";
 import type { CorsOriginSetting, DataSource } from "./config/env.js";
 import { registerAppContext } from "./context/register-app-context.js";
 import {
@@ -11,15 +12,19 @@ import {
   isDatabaseError,
 } from "./errors/api-error.js";
 import type { SignRepository } from "./repositories/sign-repository.js";
+import { adminRoutes } from "./routes/admin.js";
 import { categoryRoutes } from "./routes/categories.js";
 import { signRoutes } from "./routes/signs.js";
 
 const apiDirectory = dirname(fileURLToPath(import.meta.url));
+const adminPublicDirectory = join(apiDirectory, "../../admin/public");
 
 export interface CreateServerOptions {
   dataSource: DataSource;
   signRepository: SignRepository;
+  adminAuth?: AdminAuthConfig | null;
   enableMedia?: boolean;
+  enableAdminPanel?: boolean;
   logger?: boolean;
   corsOrigin?: CorsOriginSetting;
 }
@@ -30,7 +35,9 @@ export async function createServer(
   const {
     dataSource,
     signRepository,
+    adminAuth = null,
     enableMedia = false,
+    enableAdminPanel = Boolean(adminAuth),
     logger = false,
     corsOrigin = true,
   } = options;
@@ -70,6 +77,18 @@ export async function createServer(
 
   await server.register(categoryRoutes);
   await server.register(signRoutes);
+
+  if (enableAdminPanel && adminAuth) {
+    await server.register(adminRoutes, { adminAuth });
+    await server.register(fastifyStatic, {
+      root: adminPublicDirectory,
+      prefix: "/admin/",
+      decorateReply: false,
+    });
+    server.get("/admin", async (_request, reply) => {
+      return reply.redirect("/admin/");
+    });
+  }
 
   return server;
 }

@@ -1,3 +1,5 @@
+import type { AdminAuthConfig } from "../admin/admin-auth.js";
+
 export type DataSource = "mock" | "postgres";
 
 export type CorsOriginSetting = boolean | string | string[];
@@ -8,6 +10,7 @@ export interface AppConfig {
   port: number;
   host: string;
   corsOrigin: CorsOriginSetting;
+  adminAuth: AdminAuthConfig | null;
 }
 
 function parseCorsOrigin(value: string | undefined): CorsOriginSetting {
@@ -57,5 +60,36 @@ export function loadConfig(): AppConfig {
     port: Number(process.env.PORT ?? 3000),
     host: process.env.HOST ?? "0.0.0.0",
     corsOrigin: parseCorsOrigin(process.env.CORS_ORIGIN),
+    adminAuth: loadAdminAuthConfig(),
+  };
+}
+
+function loadAdminAuthConfig(): AdminAuthConfig | null {
+  const username = process.env.ADMIN_USERNAME?.trim();
+  const password = process.env.ADMIN_PASSWORD?.trim();
+  const sessionSecret = process.env.ADMIN_SESSION_SECRET?.trim();
+
+  if (!username && !password && !sessionSecret) {
+    return null;
+  }
+
+  if (!username || !password || !sessionSecret) {
+    throw new Error(
+      "ADMIN_USERNAME, ADMIN_PASSWORD, and ADMIN_SESSION_SECRET must all be set to enable the admin panel.",
+    );
+  }
+
+  const sessionTtlHours = Number(process.env.ADMIN_SESSION_TTL_HOURS ?? 12);
+  const sessionTtlMs = sessionTtlHours * 60 * 60 * 1000;
+
+  if (!Number.isFinite(sessionTtlMs) || sessionTtlMs <= 0) {
+    throw new Error("ADMIN_SESSION_TTL_HOURS must be a positive number.");
+  }
+
+  return {
+    username,
+    password,
+    sessionSecret,
+    sessionTtlMs,
   };
 }

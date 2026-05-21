@@ -1,0 +1,183 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  line-height: 1.5;
+  --bg: #f4f1fb;
+  --card: #ffffff;
+  --text: #1f1633;
+  --muted: #5f5675;
+  --primary: #5b3fbf;
+  --primary-dark: #4a32a0;
+  --border: #ddd5f0;
+  --error: #b42318;
+  --success: #067647;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #efe9ff 0%, var(--bg) 40%);
+  color: var(--text);
+}
+
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.card {
+  width: min(760px, 100%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(48, 30, 96, 0.08);
+}
+
+h1,
+h2 {
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  margin: 0 0 20px;
+  color: var(--muted);
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.tab-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  border: 1px solid var(--border);
+  background: #f8f6ff;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.tab-button.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.is-active {
+  display: block;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+.form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.92rem;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+input,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+textarea {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.primary-button,
+.secondary-button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: var(--primary);
+  color: #fff;
+}
+
+.primary-button:hover {
+  background: var(--primary-dark);
+}
+
+.secondary-button {
+  background: #ece7fb;
+  color: var(--text);
+}
+
+.error-message {
+  color: var(--error);
+}
+
+.status-message {
+  margin-top: 12px;
+}
+
+.status-message.is-success {
+  color: var(--success);
+}
+
+.status-message.is-error {
+  color: var(--error);
+}
+
+.help-text {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.result-log {
+  margin-top: 16px;
+  background: #f8f6ff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  white-space: pre-wrap;
+  max-height: 280px;
+  overflow: auto;
+}
+
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-header {
+    flex-direction: column;
+  }
+}

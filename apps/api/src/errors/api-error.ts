@@ -37,6 +37,12 @@ export function internalErrorResponse(
   return buildApiErrorResponse("INTERNAL_ERROR", message);
 }
 
+export function unauthorizedErrorResponse(
+  message = "Unauthorized",
+): ApiErrorResponse {
+  return buildApiErrorResponse("UNAUTHORIZED", message);
+}
+
 export function isDatabaseError(error: unknown): boolean {
   if (!error || typeof error !== "object") {
     return false;

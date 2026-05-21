@@ -18,6 +18,7 @@ English/Nepali word → concept → Nepali Sign Language sign video.
 apps/
   mobile/   # Flutter app (Android, iOS, Web)
   api/      # Dictionary API
+  admin/    # Admin web UI (static files served by the API)
 data/
   mock-signs.json   # shared mock dictionary (single source)
 docs/
@@ -41,6 +42,10 @@ cp .env.example .env
 | `DATA_SOURCE` | `mock` | `mock` = JSON file, `postgres` = PostgreSQL |
 | `DATABASE_URL` | — | Required when `DATA_SOURCE=postgres` |
 | `CORS_ORIGIN` | (allow all) | Comma-separated web app origins; set in production |
+| `ADMIN_USERNAME` | — | Enables admin panel when set with password + secret |
+| `ADMIN_PASSWORD` | — | Admin login password (never commit real values) |
+| `ADMIN_SESSION_SECRET` | — | Signs admin session tokens |
+| `ADMIN_SESSION_TTL_HOURS` | `12` | Admin session lifetime |
 
 See [Database plan](docs/database.md) for creating a local `ishara` database.
 
@@ -59,7 +64,20 @@ npm run db:import
 npm run db:import -- data/my-signs.json
 ```
 
-See [admin.md](docs/admin.md) for the future admin UI; import is the interim bulk tool.
+### Admin panel
+
+Requires `DATA_SOURCE=postgres` and admin env vars in `.env`:
+
+```bash
+# Example local settings (use your own secrets)
+ADMIN_USERNAME=some-username
+ADMIN_PASSWORD=change-me
+ADMIN_SESSION_SECRET=replace-with-long-random-string
+```
+
+Open [http://localhost:3000/admin/](http://localhost:3000/admin/) after `npm run dev`. Sign in, add single signs, or upload CSV/JSON bulk files (same shape as `data/mock-signs.json`).
+
+See [admin.md](docs/admin.md) for the full planned workflow (review queue, media upload, etc.).
 
 ## Tests
 

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ishara Admin</title>
+    <link rel="stylesheet" href="/admin/admin.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section id="login-panel" class="card">
+        <h1>Ishara Admin</h1>
+        <p class="subtitle">Sign in to manage dictionary entries.</p>
+        <form id="login-form">
+          <label>
+            Username
+            <input id="login-username" name="username" type="text" autocomplete="username" required />
+          </label>
+          <label>
+            Password
+            <input
+              id="login-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+          <button type="submit" class="primary-button">Sign in</button>
+        </form>
+        <p id="login-error" class="error-message" hidden></p>
+      </section>
+
+      <section id="admin-panel" class="card" hidden>
+        <header class="admin-header">
+          <div>
+            <h1>Ishara Admin</h1>
+            <p id="signed-in-label" class="subtitle"></p>
+          </div>
+          <button id="logout-button" type="button" class="secondary-button">Sign out</button>
+        </header>
+
+        <nav class="tab-nav" aria-label="Admin sections">
+          <button type="button" class="tab-button is-active" data-tab="add-word">Add word</button>
+          <button type="button" class="tab-button" data-tab="bulk-import">Bulk import</button>
+        </nav>
+
+        <section id="add-word-tab" class="tab-panel is-active">
+          <h2>Add a new sign</h2>
+          <form id="add-sign-form" class="form-grid">
+            <label>
+              Sign ID (slug)
+              <input name="signId" required placeholder="thank-you" />
+            </label>
+            <label>
+              Concept ID (optional)
+              <input name="conceptId" placeholder="concept-thank-you" />
+            </label>
+            <label>
+              English word
+              <input name="englishWord" required />
+            </label>
+            <label>
+              Nepali word
+              <input name="nepaliWord" required />
+            </label>
+            <label>
+              Category
+              <input name="category" list="category-options" required />
+            </label>
+            <datalist id="category-options"></datalist>
+            <label class="full-width">
+              English meaning
+              <textarea name="meaningEnglish" rows="2" required></textarea>
+            </label>
+            <label class="full-width">
+              Nepali meaning
+              <textarea name="meaningNepali" rows="2" required></textarea>
+            </label>
+            <label class="full-width">
+              Video URL (optional)
+              <input name="videoUrl" type="url" />
+            </label>
+            <label class="full-width">
+              Thumbnail URL (optional)
+              <input name="thumbnailUrl" type="url" />
+            </label>
+            <button type="submit" class="primary-button full-width">Save sign</button>
+          </form>
+          <p id="add-sign-message" class="status-message" hidden></p>
+        </section>
+
+        <section id="bulk-import-tab" class="tab-panel" hidden>
+          <h2>Bulk import</h2>
+          <p class="help-text">
+            Upload a CSV or JSON file. JSON must be an array of records using the same fields as
+            <code>data/mock-signs.json</code>.
+          </p>
+          <p class="help-text">
+            CSV header example:
+            <code
+              >id,conceptId,englishWord,nepaliWord,meaningEnglish,meaningNepali,category,videoUrl,thumbnailUrl</code
+            >
+          </p>
+          <form id="bulk-import-form">
+            <label>
+              File (.csv or .json)
+              <input
+                id="bulk-file-input"
+                name="file"
+                type="file"
+                accept=".csv,.json,application/json,text/csv"
+                required
+              />
+            </label>
+            <button type="submit" class="primary-button">Import file</button>
+          </form>
+          <pre id="bulk-import-result" class="result-log" hidden></pre>
+        </section>
+      </section>
+    </main>
+
+    <script src="/admin/admin.js" type="module"></script>
+  </body>
+</html>

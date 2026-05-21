@@ -13,7 +13,9 @@ const signRepository = createSignRepository(appConfig);
 const server = await createServer({
   dataSource: appConfig.dataSource,
   signRepository,
+  adminAuth: appConfig.adminAuth,
   enableMedia: true,
+  enableAdminPanel: appConfig.adminAuth != null,
   logger: true,
   corsOrigin: appConfig.corsOrigin,
 });

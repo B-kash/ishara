@@ -43,6 +43,7 @@ export interface SignDetail {
 export type ApiErrorCode =
   | "VALIDATION_ERROR"
   | "NOT_FOUND"
+  | "UNAUTHORIZED"
   | "DATABASE_ERROR"
   | "INTERNAL_ERROR";
 
