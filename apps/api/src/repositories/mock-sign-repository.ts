@@ -3,8 +3,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Category } from "../types/api-responses.js";
 import { categoryNameToId } from "../data/category-slug.js";
-import { signRecordMatchesSearch } from "../data/sign-search-matching.js";
-import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
+import {
+  signRecordMatchesBilingualSearch,
+  sortSignRecordsBySearchScore,
+} from "../data/sign-search-matching.js";
+import type { SignRecord } from "../types/sign-record.js";
 import type { SignRepository } from "./sign-repository.js";
 
 const mockDataDirectory = dirname(fileURLToPath(import.meta.url));
@@ -54,13 +57,12 @@ export class MockSignRepository implements SignRepository {
     return this.signRecords.find((sign) => sign.id === signId);
   }
 
-  async searchSignRecords(
-    searchQuery: string,
-    language: SearchLanguageCode,
-  ): Promise<SignRecord[]> {
-    return this.signRecords.filter((sign) =>
-      signRecordMatchesSearch(sign, searchQuery, language),
+  async searchSignRecords(searchQuery: string): Promise<SignRecord[]> {
+    const matchedRecords = this.signRecords.filter((sign) =>
+      signRecordMatchesBilingualSearch(sign, searchQuery),
     );
+
+    return sortSignRecordsBySearchScore(matchedRecords, searchQuery);
   }
 
   async getAllCategories(): Promise<Category[]> {

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum SearchLanguage {
   english,
   nepali;
@@ -10,4 +12,12 @@ enum SearchLanguage {
         return 'ne';
     }
   }
+}
+
+SearchLanguage searchLanguageFromLocale(Locale locale) {
+  if (locale.languageCode == 'ne') {
+    return SearchLanguage.nepali;
+  }
+
+  return SearchLanguage.english;
 }

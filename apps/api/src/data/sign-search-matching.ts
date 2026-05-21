@@ -1,4 +1,5 @@
 import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
+import { fuzzyMatchScore } from "./search-fuzzy.js";
 import {
   normalizeEnglishText,
   normalizeNepaliText,
@@ -6,7 +7,9 @@ import {
 } from "./search-normalization.js";
 import { expandSearchTerms } from "./search-synonyms.js";
 
-function getSignWordText(
+const nepaliScriptPattern = /[\u0900-\u097F]/;
+
+function normalizeSignWord(
   signRecord: SignRecord,
   language: SearchLanguageCode,
 ): string {
@@ -20,36 +23,6 @@ function getSignWordText(
   return normalizeNepaliText(wordText);
 }
 
-function termMatchesWord(normalizedWord: string, searchTerm: string): boolean {
-  if (normalizedWord === searchTerm) {
-    return true;
-  }
-
-  if (normalizedWord.includes(searchTerm)) {
-    return true;
-  }
-
-  return searchTerm.includes(normalizedWord);
-}
-
-export function signRecordMatchesSearch(
-  signRecord: SignRecord,
-  searchQuery: string,
-  language: SearchLanguageCode,
-): boolean {
-  const normalizedQuery = normalizeSearchQuery(searchQuery, language);
-  if (!normalizedQuery) {
-    return false;
-  }
-
-  const searchTerms = expandSearchTerms(normalizedQuery, language);
-  const normalizedWord = getSignWordText(signRecord, language);
-
-  return searchTerms.some((searchTerm) =>
-    termMatchesWord(normalizedWord, searchTerm),
-  );
-}
-
 export function buildSearchTerms(
   searchQuery: string,
   language: SearchLanguageCode,
@@ -60,4 +33,72 @@ export function buildSearchTerms(
   }
 
   return expandSearchTerms(normalizedQuery, language);
+}
+
+export function collectBilingualSearchTerms(searchQuery: string): string[] {
+  const trimmedQuery = searchQuery.trim();
+  if (!trimmedQuery) {
+    return [];
+  }
+
+  const englishTerms = buildSearchTerms(trimmedQuery, "en");
+  const nepaliTerms = buildSearchTerms(trimmedQuery, "ne");
+  const uniqueTerms = new Set([...englishTerms, ...nepaliTerms]);
+
+  return [...uniqueTerms];
+}
+
+export function detectDisplayLanguage(searchQuery: string): SearchLanguageCode {
+  if (nepaliScriptPattern.test(searchQuery)) {
+    return "ne";
+  }
+
+  return "en";
+}
+
+export function scoreBilingualSearch(
+  signRecord: SignRecord,
+  searchQuery: string,
+): number {
+  const trimmedQuery = searchQuery.trim();
+  if (!trimmedQuery) {
+    return 0;
+  }
+
+  const englishWord = normalizeSignWord(signRecord, "en");
+  const nepaliWord = normalizeSignWord(signRecord, "ne");
+  const englishTerms = buildSearchTerms(trimmedQuery, "en");
+  const nepaliTerms = buildSearchTerms(trimmedQuery, "ne");
+
+  let bestScore = 0;
+
+  for (const searchTerm of englishTerms) {
+    bestScore = Math.max(bestScore, fuzzyMatchScore(englishWord, searchTerm));
+    bestScore = Math.max(bestScore, fuzzyMatchScore(nepaliWord, searchTerm));
+  }
+
+  for (const searchTerm of nepaliTerms) {
+    bestScore = Math.max(bestScore, fuzzyMatchScore(nepaliWord, searchTerm));
+    bestScore = Math.max(bestScore, fuzzyMatchScore(englishWord, searchTerm));
+  }
+
+  return bestScore;
+}
+
+export function signRecordMatchesBilingualSearch(
+  signRecord: SignRecord,
+  searchQuery: string,
+): boolean {
+  return scoreBilingualSearch(signRecord, searchQuery) > 0;
+}
+
+export function sortSignRecordsBySearchScore(
+  signRecords: SignRecord[],
+  searchQuery: string,
+): SignRecord[] {
+  return [...signRecords].sort(
+    (left, right) =>
+      scoreBilingualSearch(right, searchQuery) -
+      scoreBilingualSearch(left, searchQuery),
+  );
 }

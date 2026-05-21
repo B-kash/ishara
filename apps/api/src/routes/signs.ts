@@ -1,15 +1,14 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
+import { detectDisplayLanguage } from "../data/sign-search-matching.js";
 import {
   databaseErrorResponse,
   notFoundErrorResponse,
   validationErrorResponse,
 } from "../errors/api-error.js";
-import { getSignRepository } from "../repositories/active-sign-repository.js";
 import { toSignDetail, toSignSearchResult } from "../mappers/sign-response.js";
 import {
   validateRequiredQueryParam,
   validateRouteId,
-  validateSearchLanguageParam,
 } from "../validation/request-validation.js";
 
 interface SignRouteParams {
@@ -21,13 +20,10 @@ function getSearchQuery(request: FastifyRequest): string | undefined {
   return queryValue["q"];
 }
 
-function getLanguageParam(request: FastifyRequest): string | undefined {
-  const queryValue = request.query as Record<string, string | undefined>;
-  return queryValue["lang"];
-}
-
 export async function signRoutes(server: FastifyInstance) {
   server.get("/signs/search", async (request, reply) => {
+    const { signRepository, log } = request.app;
+
     const searchQueryResult = validateRequiredQueryParam(
       getSearchQuery(request),
       "q",
@@ -38,33 +34,24 @@ export async function signRoutes(server: FastifyInstance) {
         .send(validationErrorResponse(searchQueryResult.message));
     }
 
-    const languageResult = validateSearchLanguageParam(
-      getLanguageParam(request),
-    );
-    if (!languageResult.ok) {
-      return reply
-        .status(400)
-        .send(validationErrorResponse(languageResult.message));
-    }
-
     try {
-      const signRepository = getSignRepository();
       const matchedRecords = await signRepository.searchSignRecords(
         searchQueryResult.value,
-        languageResult.value,
       );
+      const displayLanguage = detectDisplayLanguage(searchQueryResult.value);
       const items = matchedRecords.map((signRecord) =>
-        toSignSearchResult(signRecord, languageResult.value),
+        toSignSearchResult(signRecord, displayLanguage),
       );
 
       return { items };
     } catch (error) {
-      request.log.error(error);
+      log.error(error);
       return reply.status(503).send(databaseErrorResponse());
     }
   });
 
   server.get("/signs/:id", async (request, reply) => {
+    const { signRepository, log } = request.app;
     const routeParams = request.params as SignRouteParams;
     const signIdResult = validateRouteId(routeParams.id, "Sign");
     if (!signIdResult.ok) {
@@ -74,7 +61,6 @@ export async function signRoutes(server: FastifyInstance) {
     }
 
     try {
-      const signRepository = getSignRepository();
       const signRecord = await signRepository.getSignById(signIdResult.value);
 
       if (!signRecord) {
@@ -85,7 +71,7 @@ export async function signRoutes(server: FastifyInstance) {
 
       return toSignDetail(signRecord);
     } catch (error) {
-      request.log.error(error);
+      log.error(error);
       return reply.status(503).send(databaseErrorResponse());
     }
   });

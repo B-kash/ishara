@@ -110,6 +110,12 @@ abstract class AppLocalizations {
   /// **'Nepali Sign Language dictionary'**
   String get appSubtitle;
 
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in English or Nepali'**
+  String get searchHint;
+
   /// No description provided for @searchHintEnglish.
   ///
   /// In en, this message translates to:

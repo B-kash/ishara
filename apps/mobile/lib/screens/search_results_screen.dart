@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../api/sign_api_client.dart';
+import '../l10n/friendly_error_message.dart';
 import '../l10n/l10n_extensions.dart';
-import '../models/search_language.dart';
+import '../widgets/app_snackbar.dart';
 import '../models/sign_search_result.dart';
 import '../state/async_view_state.dart';
 import '../widgets/async_state_body.dart';
@@ -13,12 +14,10 @@ class SearchResultsScreen extends StatefulWidget {
     super.key,
     required this.signApiClient,
     required this.query,
-    required this.language,
   });
 
   final SignApiClient signApiClient;
   final String query;
-  final SearchLanguage language;
 
   @override
   State<SearchResultsScreen> createState() => _SearchResultsScreenState();
@@ -42,7 +41,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     try {
       final results = await widget.signApiClient.searchSigns(
         query: widget.query,
-        language: widget.language,
       );
 
       if (!mounted) {
@@ -61,11 +59,21 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         return;
       }
 
+      final friendlyMessage = friendlyApiErrorMessage(
+        context,
+        error,
+        FetchErrorContext.search,
+      );
+
       setState(() {
-        _resultsState = AsyncViewState.error(
-          localizeErrorMessage(context, error),
-        );
+        _resultsState = AsyncViewState.error();
       });
+
+      showErrorSnackBarAfterBuild(
+        context,
+        message: friendlyMessage,
+        onRetry: _loadResults,
+      );
     }
   }
 

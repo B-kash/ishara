@@ -1,7 +1,11 @@
 import type pg from "pg";
-import { buildSearchTerms } from "../data/sign-search-matching.js";
+import {
+  collectBilingualSearchTerms,
+  signRecordMatchesBilingualSearch,
+  sortSignRecordsBySearchScore,
+} from "../data/sign-search-matching.js";
 import type { Category } from "../types/api-responses.js";
-import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
+import type { SignRecord } from "../types/sign-record.js";
 import { createPostgresPool } from "./postgres/postgres-pool.js";
 import {
   mapRowToSignRecord,
@@ -38,34 +42,33 @@ export class PostgresSignRepository implements SignRepository {
     return records[0];
   }
 
-  async searchSignRecords(
-    searchQuery: string,
-    language: SearchLanguageCode,
-  ): Promise<SignRecord[]> {
-    const searchTerms = buildSearchTerms(searchQuery, language);
+  async searchSignRecords(searchQuery: string): Promise<SignRecord[]> {
+    const searchTerms = collectBilingualSearchTerms(searchQuery);
     if (searchTerms.length === 0) {
       return [];
     }
 
-    return this.querySignRecords(
+    const candidateRecords = await this.querySignRecords(
       `where exists (
         select 1
         from words search_words
         where search_words.concept_id = concepts.id
-          and search_words.language = $1
-          and (
-            lower(search_words.word) = any($2::text[])
-            or exists (
-              select 1
-              from unnest($2::text[]) as search_term
-              where lower(search_words.word) like '%' || search_term || '%'
-                 or search_term like '%' || lower(search_words.word) || '%'
-            )
+          and exists (
+            select 1
+            from unnest($1::text[]) as search_term
+            where lower(search_words.word) like '%' || search_term || '%'
+               or search_term like '%' || lower(search_words.word) || '%'
           )
       )
       order by signs.id`,
-      [language, searchTerms],
+      [searchTerms],
     );
+
+    const matchedRecords = candidateRecords.filter((signRecord) =>
+      signRecordMatchesBilingualSearch(signRecord, searchQuery),
+    );
+
+    return sortSignRecordsBySearchScore(matchedRecords, searchQuery);
   }
 
   async getAllCategories(): Promise<Category[]> {

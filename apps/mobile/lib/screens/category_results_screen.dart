@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../api/sign_api_client.dart';
+import '../l10n/friendly_error_message.dart';
 import '../l10n/l10n_extensions.dart';
+import '../widgets/app_snackbar.dart';
 import '../models/search_language.dart';
 import '../models/sign_search_result.dart';
 import '../state/async_view_state.dart';
@@ -63,11 +65,21 @@ class _CategoryResultsScreenState extends State<CategoryResultsScreen> {
         return;
       }
 
+      final friendlyMessage = friendlyApiErrorMessage(
+        context,
+        error,
+        FetchErrorContext.categorySigns,
+      );
+
       setState(() {
-        _resultsState = AsyncViewState.error(
-          localizeErrorMessage(context, error),
-        );
+        _resultsState = AsyncViewState.error();
       });
+
+      showErrorSnackBarAfterBuild(
+        context,
+        message: friendlyMessage,
+        onRetry: _loadResults,
+      );
     }
   }
 

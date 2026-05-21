@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:ishara/l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
@@ -108,13 +108,10 @@ class SignApiClient {
 
   Future<List<SignSearchResult>> searchSigns({
     required String query,
-    required SearchLanguage language,
   }) async {
-    final languageCode = language.apiCode;
     final uri = Uri.parse('$baseUrl/signs/search').replace(
       queryParameters: {
         'q': query,
-        'lang': languageCode,
       },
     );
 

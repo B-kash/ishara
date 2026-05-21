@@ -15,6 +15,9 @@ class AppLocalizationsNe extends AppLocalizations {
   String get appSubtitle => 'नेपाली साङ्केतिक भाषा शब्दकोश';
 
   @override
+  String get searchHint => 'अङ्ग्रेजी वा नेपालीमा खोज्नुहोस्';
+
+  @override
   String get searchHintEnglish => 'अङ्ग्रेजीमा खोज्नुहोस्';
 
   @override

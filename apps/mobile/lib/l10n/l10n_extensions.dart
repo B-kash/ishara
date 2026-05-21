@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:ishara/l10n/app_localizations.dart';
 
-import '../api/sign_api_client.dart';
 import '../theme/ishara_theme.dart';
 
 extension L10nContext on BuildContext {
@@ -25,12 +24,3 @@ extension IsharaThemeL10n on IsharaThemeId {
   }
 }
 
-String localizeErrorMessage(BuildContext context, Object error) {
-  final l10n = AppLocalizations.of(context)!;
-
-  if (error is SignApiException) {
-    return error.localize(l10n);
-  }
-
-  return l10n.somethingWentWrong;
-}

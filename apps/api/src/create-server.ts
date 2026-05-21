@@ -4,12 +4,12 @@ import fastifyStatic from "@fastify/static";
 import cors from "@fastify/cors";
 import Fastify, { type FastifyInstance } from "fastify";
 import type { CorsOriginSetting, DataSource } from "./config/env.js";
+import { registerAppContext } from "./context/register-app-context.js";
 import {
   databaseErrorResponse,
   internalErrorResponse,
   isDatabaseError,
 } from "./errors/api-error.js";
-import { setSignRepository } from "./repositories/active-sign-repository.js";
 import type { SignRepository } from "./repositories/sign-repository.js";
 import { categoryRoutes } from "./routes/categories.js";
 import { signRoutes } from "./routes/signs.js";
@@ -35,12 +35,13 @@ export async function createServer(
     corsOrigin = true,
   } = options;
 
-  setSignRepository(signRepository);
-
   const server = Fastify({ logger });
 
+  await registerAppContext(server, { signRepository, dataSource });
+
   server.setErrorHandler((error, request, reply) => {
-    request.log.error(error);
+    const log = request.app?.log ?? server.log;
+    log.error(error);
 
     if (isDatabaseError(error)) {
       return reply.status(503).send(databaseErrorResponse());
@@ -60,10 +61,10 @@ export async function createServer(
     });
   }
 
-  server.get("/health", async () => {
+  server.get("/health", async (request) => {
     return {
       status: "ok",
-      dataSource,
+      dataSource: request.app.dataSource,
     };
   });
 

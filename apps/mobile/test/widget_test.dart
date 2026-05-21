@@ -55,7 +55,6 @@ void main() {
 
     expect(find.text('Ishara'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('English'), findsOneWidget);
     expect(find.text('Greetings'), findsOneWidget);
   });
 
@@ -153,9 +152,12 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_forward));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
 
+    expect(find.byType(SnackBar), findsOneWidget);
     expect(find.text('Could not reach the API'), findsOneWidget);
-    expect(find.text('Try again'), findsOneWidget);
+    expect(find.textContaining('500'), findsNothing);
+    expect(find.text('Try again'), findsWidgets);
   });
 
   testWidgets('home shows error when categories fail to load',
@@ -173,9 +175,12 @@ void main() {
     await tester.pumpWidget(buildTestApp(signApiClient));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
 
+    expect(find.byType(SnackBar), findsOneWidget);
     expect(find.text('Could not load categories'), findsOneWidget);
-    expect(find.text('Try again'), findsOneWidget);
+    expect(find.textContaining('500'), findsNothing);
+    expect(find.text('Try again'), findsWidgets);
   });
 
   testWidgets('theme menu switches app theme', (WidgetTester tester) async {

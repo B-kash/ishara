@@ -2,6 +2,7 @@
   "@@locale": "en",
   "appTitle": "Ishara",
   "appSubtitle": "Nepali Sign Language dictionary",
+  "searchHint": "Search in English or Nepali",
   "searchHintEnglish": "Search in English",
   "searchHintNepali": "Search in Nepali",
   "searchLanguageEnglish": "English",

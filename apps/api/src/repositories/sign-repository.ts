@@ -4,10 +4,7 @@ import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
 export interface SignRepository {
   getAllSignRecords(): Promise<SignRecord[]>;
   getSignById(signId: string): Promise<SignRecord | undefined>;
-  searchSignRecords(
-    searchQuery: string,
-    language: SearchLanguageCode,
-  ): Promise<SignRecord[]>;
+  searchSignRecords(searchQuery: string): Promise<SignRecord[]>;
   getAllCategories(): Promise<Category[]>;
   getCategoryById(categoryId: string): Promise<Category | undefined>;
   getSignRecordsByCategoryId(

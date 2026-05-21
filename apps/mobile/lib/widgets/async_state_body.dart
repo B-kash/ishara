@@ -35,12 +35,10 @@ class AsyncStateBody<T> extends StatelessWidget {
         return loadingBuilder?.call(context) ??
             const Center(child: CircularProgressIndicator());
       case AsyncViewStatus.error:
-        return _MessagePanel(
+        return _RetryPanel(
           icon: Icons.cloud_off,
           title: errorTitle ?? l10n.couldNotReachApi,
-          message: state.errorMessage ?? l10n.somethingWentWrong,
-          actionLabel: l10n.tryAgain,
-          onAction: onRetry,
+          onRetry: onRetry,
         );
       case AsyncViewStatus.empty:
         return _MessagePanel(
@@ -51,12 +49,10 @@ class AsyncStateBody<T> extends StatelessWidget {
       case AsyncViewStatus.success:
         final data = state.data;
         if (data == null) {
-          return _MessagePanel(
+          return _RetryPanel(
             icon: Icons.error_outline,
             title: errorTitle ?? l10n.couldNotReachApi,
-            message: l10n.missingData,
-            actionLabel: l10n.tryAgain,
-            onAction: onRetry,
+            onRetry: onRetry,
           );
         }
 
@@ -73,20 +69,60 @@ class AsyncStateBody<T> extends StatelessWidget {
   }
 }
 
+class _RetryPanel extends StatelessWidget {
+  const _RetryPanel({
+    required this.icon,
+    required this.title,
+    required this.onRetry,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: onRetry,
+              child: Text(l10n.tryAgain),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _MessagePanel extends StatelessWidget {
   const _MessagePanel({
     required this.icon,
     required this.title,
     required this.message,
-    this.actionLabel,
-    this.onAction,
   });
 
   final IconData icon;
   final String title;
   final String message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -111,13 +147,6 @@ class _MessagePanel extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
             ),
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: onAction,
-                child: Text(actionLabel!),
-              ),
-            ],
           ],
         ),
       ),

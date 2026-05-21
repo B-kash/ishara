@@ -4,7 +4,6 @@ import {
   notFoundErrorResponse,
   validationErrorResponse,
 } from "../errors/api-error.js";
-import { getSignRepository } from "../repositories/active-sign-repository.js";
 import { toSignSearchResult } from "../mappers/sign-response.js";
 import {
   validateRouteId,
@@ -22,17 +21,19 @@ function getLanguageParam(request: FastifyRequest): string | undefined {
 
 export async function categoryRoutes(server: FastifyInstance) {
   server.get("/categories", async (request, reply) => {
+    const { signRepository, log } = request.app;
+
     try {
-      const signRepository = getSignRepository();
       const categories = await signRepository.getAllCategories();
       return { items: categories };
     } catch (error) {
-      request.log.error(error);
+      log.error(error);
       return reply.status(503).send(databaseErrorResponse());
     }
   });
 
   server.get("/categories/:id/signs", async (request, reply) => {
+    const { signRepository, log } = request.app;
     const routeParams = request.params as CategoryRouteParams;
     const categoryIdResult = validateRouteId(routeParams.id, "Category");
     if (!categoryIdResult.ok) {
@@ -51,7 +52,6 @@ export async function categoryRoutes(server: FastifyInstance) {
     }
 
     try {
-      const signRepository = getSignRepository();
       const category = await signRepository.getCategoryById(
         categoryIdResult.value,
       );
@@ -70,7 +70,7 @@ export async function categoryRoutes(server: FastifyInstance) {
 
       return { items };
     } catch (error) {
-      request.log.error(error);
+      log.error(error);
       return reply.status(503).send(databaseErrorResponse());
     }
   });

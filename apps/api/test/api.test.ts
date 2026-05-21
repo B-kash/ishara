@@ -32,10 +32,44 @@ describe("GET /health", () => {
 });
 
 describe("GET /signs/search", () => {
-  test("returns mother in English search", async () => {
+  test("returns mother for English query without lang", async () => {
     const response = await server.inject({
       method: "GET",
-      url: "/signs/search?q=mother&lang=en",
+      url: "/signs/search?q=mother",
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json<{ items: { id: string }[] }>();
+    assert.ok(body.items.some((item) => item.id === "mother"));
+  });
+
+  test("returns mother for Nepali query without lang", async () => {
+    const nepaliQuery = encodeURIComponent("आमा");
+    const response = await server.inject({
+      method: "GET",
+      url: `/signs/search?q=${nepaliQuery}`,
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json<{ items: { id: string }[] }>();
+    assert.ok(body.items.some((item) => item.id === "mother"));
+  });
+
+  test("fuzzy matches mom to mother", async () => {
+    const response = await server.inject({
+      method: "GET",
+      url: "/signs/search?q=mom",
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json<{ items: { id: string }[] }>();
+    assert.ok(body.items.some((item) => item.id === "mother"));
+  });
+
+  test("fuzzy matches typo motr to mother", async () => {
+    const response = await server.inject({
+      method: "GET",
+      url: "/signs/search?q=motr",
     });
 
     assert.equal(response.statusCode, 200);
@@ -46,22 +80,11 @@ describe("GET /signs/search", () => {
   test("returns validation error when q is missing", async () => {
     const response = await server.inject({
       method: "GET",
-      url: "/signs/search?lang=en",
+      url: "/signs/search",
     });
 
     assert.equal(response.statusCode, 400);
     const body = response.json<{ error: { code: string; message: string } }>();
-    assert.equal(body.error.code, "VALIDATION_ERROR");
-  });
-
-  test("returns validation error for invalid lang", async () => {
-    const response = await server.inject({
-      method: "GET",
-      url: "/signs/search?q=mother&lang=fr",
-    });
-
-    assert.equal(response.statusCode, 400);
-    const body = response.json<{ error: { code: string } }>();
     assert.equal(body.error.code, "VALIDATION_ERROR");
   });
 });

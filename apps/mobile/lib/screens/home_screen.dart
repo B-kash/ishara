@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../api/sign_api_client.dart';
+import '../l10n/friendly_error_message.dart';
 import '../l10n/l10n_extensions.dart';
+import '../widgets/app_snackbar.dart';
 import '../locale/locale_controller.dart';
 import '../models/category.dart';
 import '../models/search_language.dart';
@@ -30,7 +32,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _searchController = TextEditingController();
-  SearchLanguage _language = SearchLanguage.english;
   AsyncViewState<List<Category>> _categoriesState = AsyncViewState.idle();
 
   @override
@@ -68,11 +69,21 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
+      final friendlyMessage = friendlyApiErrorMessage(
+        context,
+        error,
+        FetchErrorContext.categories,
+      );
+
       setState(() {
-        _categoriesState = AsyncViewState.error(
-          localizeErrorMessage(context, error),
-        );
+        _categoriesState = AsyncViewState.error();
       });
+
+      showErrorSnackBarAfterBuild(
+        context,
+        message: friendlyMessage,
+        onRetry: _loadCategories,
+      );
     }
   }
 
@@ -86,20 +97,23 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) => SearchResultsScreen(
           signApiClient: widget.signApiClient,
           query: query,
-          language: _language,
         ),
       ),
     );
   }
 
   void _openCategory(Category category) {
+    final categoryLanguage = searchLanguageFromLocale(
+      widget.localeController.locale,
+    );
+
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => CategoryResultsScreen(
           signApiClient: widget.signApiClient,
           categoryId: category.id,
           categoryName: category.name,
-          language: _language,
+          language: categoryLanguage,
         ),
       ),
     );
@@ -117,28 +131,10 @@ class _HomeScreenState extends State<HomeScreen> {
           child: LinearProgressIndicator(),
         );
       case AsyncViewStatus.error:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.couldNotLoadCategories,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _categoriesState.errorMessage ?? l10n.somethingWentWrong,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: _loadCategories,
-              child: Text(l10n.tryAgain),
-            ),
-          ],
+        return TextButton.icon(
+          onPressed: _loadCategories,
+          icon: const Icon(Icons.refresh),
+          label: Text(l10n.tryAgain),
         );
       case AsyncViewStatus.empty:
         return Text(
@@ -199,9 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: _language == SearchLanguage.english
-                    ? l10n.searchHintEnglish
-                    : l10n.searchHintNepali,
+                hintText: l10n.searchHint,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.arrow_forward),
@@ -211,25 +205,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               textInputAction: TextInputAction.search,
               onSubmitted: (value) => _submitSearch(),
-            ),
-            const SizedBox(height: 16),
-            SegmentedButton<SearchLanguage>(
-              segments: [
-                ButtonSegment(
-                  value: SearchLanguage.english,
-                  label: Text(l10n.searchLanguageEnglish),
-                ),
-                ButtonSegment(
-                  value: SearchLanguage.nepali,
-                  label: Text(l10n.searchLanguageNepali),
-                ),
-              ],
-              selected: {_language},
-              onSelectionChanged: (selected) {
-                setState(() {
-                  _language = selected.first;
-                });
-              },
             ),
             const SizedBox(height: 24),
             Text(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../api/sign_api_client.dart';
+import '../l10n/friendly_error_message.dart';
 import '../l10n/l10n_extensions.dart';
+import '../widgets/app_snackbar.dart';
 import '../models/sign_detail.dart';
 import '../state/async_view_state.dart';
 import '../widgets/async_state_body.dart';
@@ -50,11 +52,28 @@ class _SignDetailScreenState extends State<SignDetailScreen> {
         return;
       }
 
-      setState(() {
-        _detailState = AsyncViewState.error(
-          localizeErrorMessage(context, error),
-        );
-      });
+      final friendlyMessage = friendlyApiErrorMessage(
+        context,
+        error,
+        FetchErrorContext.signDetail,
+      );
+
+      if (error is SignApiException &&
+          error.kind == SignApiErrorKind.signNotFound) {
+        setState(() {
+          _detailState = AsyncViewState.empty();
+        });
+      } else {
+        setState(() {
+          _detailState = AsyncViewState.error();
+        });
+      }
+
+      showErrorSnackBarAfterBuild(
+        context,
+        message: friendlyMessage,
+        onRetry: _loadSignDetail,
+      );
     }
   }
 

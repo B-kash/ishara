@@ -36,8 +36,11 @@ Tap the palette icon on the home screen to switch between **Ishara**, **Ocean**,
 Tap the **globe** icon to switch UI between **English** and **Nepali** (नेपाली). Strings live in `lib/l10n/app_en.arb` and `lib/l10n/app_ne.arb`. After editing ARB files, run:
 
 ```bash
+flutter pub get
 flutter gen-l10n
 ```
+
+Generated files are in `lib/l10n/` (import `package:ishara/l10n/app_localizations.dart`).
 
 Search language (English/Nepali segmented control) is separate from UI language — it controls which dictionary words the API searches.
 

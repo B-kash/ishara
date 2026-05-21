@@ -15,6 +15,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appSubtitle => 'Nepali Sign Language dictionary';
 
   @override
+  String get searchHint => 'Search in English or Nepali';
+
+  @override
   String get searchHintEnglish => 'Search in English';
 
   @override

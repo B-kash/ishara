@@ -10,12 +10,10 @@ class AsyncViewState<T> {
   const AsyncViewState({
     required this.status,
     this.data,
-    this.errorMessage,
   });
 
   final AsyncViewStatus status;
   final T? data;
-  final String? errorMessage;
 
   factory AsyncViewState.idle() {
     return const AsyncViewState(status: AsyncViewStatus.idle);
@@ -33,10 +31,7 @@ class AsyncViewState<T> {
     return const AsyncViewState(status: AsyncViewStatus.empty);
   }
 
-  factory AsyncViewState.error(String message) {
-    return AsyncViewState(
-      status: AsyncViewStatus.error,
-      errorMessage: message,
-    );
+  factory AsyncViewState.error() {
+    return const AsyncViewState(status: AsyncViewStatus.error);
   }
 }
