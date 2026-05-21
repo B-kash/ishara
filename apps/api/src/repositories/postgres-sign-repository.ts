@@ -20,6 +20,10 @@ export class PostgresSignRepository implements SignRepository {
     this.pool = createPostgresPool(databaseUrl);
   }
 
+  /**
+   * whereClause is hardcoded in this file only — never built from request input.
+   * User values are passed via parameters ($1, $2) so the driver binds them as data.
+   */
   private async querySignRecords(
     whereClause: string,
     parameters: unknown[],

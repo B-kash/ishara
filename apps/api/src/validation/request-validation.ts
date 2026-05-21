@@ -40,6 +40,9 @@ export function validateSearchLanguageParam(
   return { ok: true, value: searchLanguage };
 }
 
+/** URL path ids are slugs (e.g. hello, thank-you, family). Not used inside SQL text. */
+const slugIdPattern = /^[a-z0-9-]+$/;
+
 export function validateRouteId(
   routeId: string | undefined,
   resourceName: string,
@@ -47,6 +50,10 @@ export function validateRouteId(
   const trimmedId = routeId?.trim();
   if (!trimmedId) {
     return validationFailure(`${resourceName} id is required`);
+  }
+
+  if (!slugIdPattern.test(trimmedId)) {
+    return validationFailure(`${resourceName} id is invalid`);
   }
 
   return { ok: true, value: trimmedId };

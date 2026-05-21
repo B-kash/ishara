@@ -119,6 +119,18 @@ describe("GET /signs/:id", () => {
     const body = response.json<{ error: { code: string } }>();
     assert.equal(body.error.code, "NOT_FOUND");
   });
+
+  test("rejects sign id with SQL metacharacters", async () => {
+    const maliciousId = encodeURIComponent("'; DROP TABLE signs; --");
+    const response = await server.inject({
+      method: "GET",
+      url: `/signs/${maliciousId}`,
+    });
+
+    assert.equal(response.statusCode, 400);
+    const body = response.json<{ error: { code: string } }>();
+    assert.equal(body.error.code, "VALIDATION_ERROR");
+  });
 });
 
 describe("GET /categories", () => {
