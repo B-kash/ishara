@@ -23,6 +23,7 @@ data/
 docs/
   product.md
   architecture.md
+  admin.md        # future admin panel plan (not implemented)
 ```
 
 Mock dictionary data for the API lives in `data/mock-signs.json`.
@@ -45,7 +46,17 @@ PostgreSQL setup (after `DATABASE_URL` is in `.env`):
 ```bash
 npm run db:migrate   # runs new migrations only
 npm run db:seed      # clears and reloads seed data (safe to re-run)
+npm run db:import    # merge JSON signs into Postgres (skips duplicates)
 ```
+
+Bulk import from JSON (default: `data/mock-signs.json`):
+
+```bash
+npm run db:import
+npm run db:import -- data/my-signs.json
+```
+
+See [admin.md](docs/admin.md) for the future admin UI; import is the interim bulk tool.
 
 ## Prerequisites
 
