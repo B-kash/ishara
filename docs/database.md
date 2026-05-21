@@ -52,7 +52,9 @@ Tracked table (migrations only):
 
 Later we can add `pg_trgm` or full-text search if prefix/substring search needs to scale.
 
-## Mapping to the current API (future)
+## Mapping to the API and Flutter app
+
+The API joins four tables into one internal type (`SignRecord`), then maps to JSON for clients. Full diagram and file pointers: **[data-model.md](data-model.md)**.
 
 | API response field | Source |
 |------------------|--------|
@@ -61,9 +63,9 @@ Later we can add `pg_trgm` or full-text search if prefix/substring search needs 
 | `nepaliWord` | `words.word` where `language = 'ne'` |
 | `category` | `categories.name` via `concepts.category_id` |
 | `meaning` | `concepts.meaning_english` or `meaning_nepali` by `lang` |
-| `videoUrl` / `thumbnailUrl` | `signs.video_url`, `signs.thumbnail_url` |
+| `videoUrl` / `thumbnailUrl` | `signs.video_url`, `signs.thumbnail_url` (detail only) |
 
-Category endpoints map to `categories` and `concepts.category_id`.
+Join SQL: `apps/api/src/repositories/postgres/postgres-row-mapper.ts`.
 
 ## Sample seed data
 

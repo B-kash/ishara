@@ -272,5 +272,6 @@ GitHub Actions runs on push/PR to `main` or `master`: API build + tests, Flutter
 - [Product brief](docs/product.md)
 - [Architecture](docs/architecture.md)
 - [Database plan](docs/database.md)
+- [Data model (tables → API → app)](docs/data-model.md)
 - [Admin panel](docs/admin.md)
 - [Deployment](docs/deployment.md)
