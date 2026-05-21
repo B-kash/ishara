@@ -24,7 +24,7 @@ data/
 docs/
   product.md
   architecture.md
-  admin.md        # future admin panel plan (not implemented)
+  admin.md        # admin panel guide (auth, API, bulk import)
 ```
 
 Mock dictionary data for the API lives in `data/mock-signs.json`.
@@ -66,18 +66,30 @@ npm run db:import -- data/my-signs.json
 
 ### Admin panel
 
-Requires `DATA_SOURCE=postgres` and admin env vars in `.env`:
+Staff UI for adding dictionary entries. Not part of the Flutter consumer app.
 
-```bash
-# Example local settings (use your own secrets)
-ADMIN_USERNAME=some-username
+**Requirements:** `DATA_SOURCE=postgres`, `DATABASE_URL`, and all three admin variables in `.env`:
+
+```env
+ADMIN_USERNAME=editor
 ADMIN_PASSWORD=change-me
 ADMIN_SESSION_SECRET=replace-with-long-random-string
 ```
 
-Open [http://localhost:3000/admin/](http://localhost:3000/admin/) after `npm run dev`. Sign in, add single signs, or upload CSV/JSON bulk files (same shape as `data/mock-signs.json`).
+| Task | How |
+|------|-----|
+| Open UI | http://localhost:3000/admin/ (after `npm run dev`) |
+| Add one sign | **Add word** tab — sign id, words, meanings, category, optional media URLs |
+| Bulk add | **Bulk import** tab — upload `.csv` or `.json` (same fields as `data/mock-signs.json`) |
+| CLI bulk (no UI) | `npm run db:import` |
 
-See [admin.md](docs/admin.md) for the full planned workflow (review queue, media upload, etc.).
+CSV header example:
+
+`id,conceptId,englishWord,nepaliWord,meaningEnglish,meaningNepali,category,videoUrl,thumbnailUrl`
+
+Full API and auth details: [docs/admin.md](docs/admin.md).
+
+**Not implemented yet:** edit signs, video file upload, draft/review/publish workflow, multiple users/roles.
 
 ## Tests
 
@@ -192,6 +204,23 @@ npm run api:build   # compile TypeScript to dist/
 npm run api:start   # run compiled server
 ```
 
+### Admin panel (web)
+
+Use PostgreSQL and admin env vars (see [Admin panel](#admin-panel) above). The API serves the UI from `apps/admin/public/` — no separate dev server.
+
+```bash
+npm run dev
+# → http://localhost:3000/admin/
+```
+
+Login example (API only):
+
+```bash
+curl -X POST http://127.0.0.1:3000/admin/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"editor","password":"change-me"}'
+```
+
 ### Mobile app
 
 Start the API first, then run the app:
@@ -220,9 +249,11 @@ flutter run -d android   # Android (emulator: use 10.0.2.2 for API — see apps/
 flutter run -d ios       # iOS (macOS with Xcode)
 ```
 
-**Themes:** palette icon on the home screen (5 themes, saved locally).
+**Layout:** fixed header (title, locale, theme) and footer (Home / Browse); screen content swaps in the body navigator.
 
-**App language:** globe icon — English / Nepali UI (ARB files in `apps/mobile/lib/l10n/`).
+**Themes:** palette icon in the header (5 themes, saved locally).
+
+**App language:** globe icon in the header — English / Nepali UI (ARB files in `apps/mobile/lib/l10n/`).
 
 Platform notes: [apps/mobile/README.md](apps/mobile/README.md)
 
@@ -241,5 +272,5 @@ GitHub Actions runs on push/PR to `main` or `master`: API build + tests, Flutter
 - [Product brief](docs/product.md)
 - [Architecture](docs/architecture.md)
 - [Database plan](docs/database.md)
+- [Admin panel](docs/admin.md)
 - [Deployment](docs/deployment.md)
-- [Admin plan (future)](docs/admin.md)

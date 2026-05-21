@@ -27,6 +27,10 @@ Copy [`.env.example`](../.env.example) to `.env` on the server. Never commit `.e
 | `DATA_SOURCE` | Yes | `postgres` | `mock` or `postgres` |
 | `DATABASE_URL` | When postgres | `postgresql://…` | PostgreSQL connection string |
 | `CORS_ORIGIN` | Production | `https://app.example.com` | Allowed Flutter web origin(s), comma-separated. Empty or `*` allows all (dev only). |
+| `ADMIN_USERNAME` | For admin | `editor` | Enables `/admin/` when set with password + secret |
+| `ADMIN_PASSWORD` | For admin | (secret) | Admin login password |
+| `ADMIN_SESSION_SECRET` | For admin | (long random) | Signs session tokens |
+| `ADMIN_SESSION_TTL_HOURS` | No | `12` | Admin session lifetime |
 
 Flutter app build-time variable:
 
@@ -51,8 +55,9 @@ The schema lives in `supabase/migrations/`. The API uses generic `DATABASE_URL` 
 
 1. Create database and user with least privilege.
 2. `npm run db:migrate` against production URL (once per release with new migrations).
-3. Load data via `npm run db:import` or controlled admin process.
+3. Load data via `npm run db:import`, `npm run db:seed`, or the [admin panel](admin.md) after deploy.
 4. Set `DATA_SOURCE=postgres` and `DATABASE_URL` on the API host.
+5. For staff edits in production, set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ADMIN_SESSION_SECRET`; restrict `/admin/` by network or reverse-proxy auth if possible.
 
 ## Video storage options
 
@@ -189,6 +194,7 @@ For App Store: enable required privacy descriptions if you add camera/microphone
 2. `GET /signs/search?q=hello&lang=en` returns items
 3. Open Flutter web or app → search → open **hello** → video plays if `video_url` is set
 4. Confirm CORS: web app origin listed in `CORS_ORIGIN`
+5. If admin is enabled: open `https://<api-host>/admin/`, sign in, confirm `GET /admin/session` with Bearer token
 
 ## CI
 
@@ -205,9 +211,10 @@ Deployment is manual until a CD pipeline is added.
 - Use strong `DATABASE_URL` credentials and private networking where possible.
 - Restrict `CORS_ORIGIN` in production.
 - Serve API and app over HTTPS only.
+- Use a long random `ADMIN_SESSION_SECRET` and a strong `ADMIN_PASSWORD`; do not expose `/admin/` without HTTPS.
 
 ## Related docs
 
 - [Architecture](architecture.md)
-- [Admin plan (future)](admin.md)
+- [Admin panel](admin.md)
 - [Database setup](database.md)

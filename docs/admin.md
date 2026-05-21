@@ -1,185 +1,210 @@
-# Ishara Admin Panel — Plan (not built yet)
+# Ishara Admin Panel
 
-This document describes the **future** admin experience for managing dictionary content. There is no admin UI or admin API in the MVP. Editors use scripts and database tools until this is built.
+Staff-facing web UI for adding dictionary entries to PostgreSQL. The public Flutter app stays read-only.
 
-## Goals
+**URL (local):** [http://localhost:3000/admin/](http://localhost:3000/admin/) — served as static files from `apps/admin/public/` by the API.
 
-- Let trusted editors add and update signs without touching SQL by hand.
-- Keep the public Flutter app read-only (search and playback only).
-- Support a simple review step before new or changed signs appear in the dictionary.
+## What is implemented
 
-## Who uses it
+| Feature | Status |
+|---------|--------|
+| Login (username + password) | Done |
+| Session tokens (signed, TTL from env) | Done |
+| Add one sign (form) | Done |
+| Bulk import (CSV or JSON upload) | Done |
+| Video/thumbnail **URLs** in forms | Done |
+| Video file upload | Not yet |
+| Edit existing signs | Not yet |
+| Draft / review / publish workflow | Not yet |
+| Multiple admin users or roles | Not yet |
 
-| Role | Can do |
-|------|--------|
-| **Editor** | Create and edit drafts, upload media, submit for review |
-| **Reviewer** | Approve or reject drafts, publish approved signs |
-| **Admin** | Everything above plus user/role management (later) |
+Writes require `DATA_SOURCE=postgres`. Mock mode still serves the public API but admin sign endpoints return an error.
 
-## Data the admin manages
+## Setup
 
-Admin screens map to existing PostgreSQL entities (see [architecture.md](architecture.md)):
+1. Copy [`.env.example`](../.env.example) to `.env` if you have not already.
+2. Set PostgreSQL:
 
-| Entity | Purpose |
-|--------|---------|
-| **Category** | Grouping (Family, Greetings, …) |
-| **Concept** | One meaning (English + Nepali glosses) |
-| **Word** | Searchable label per language (`en` / `ne`) linked to a concept |
-| **Sign** | Video/thumbnail URLs and publish state for a concept |
+   ```env
+   DATA_SOURCE=postgres
+   DATABASE_URL=postgresql://user:password@localhost:5432/ishara
+   ```
 
-Today each concept has at most one English word and one Nepali word. Synonyms may require relaxing the `unique (concept_id, language)` constraint or a separate synonyms table later.
+3. Set **all three** admin variables (panel is disabled if any are missing):
 
-## Planned features
+   ```env
+   ADMIN_USERNAME=editor
+   ADMIN_PASSWORD=change-me-in-production
+   ADMIN_SESSION_SECRET=replace-with-long-random-string
+   ```
 
-### Add sign
+   Optional: `ADMIN_SESSION_TTL_HOURS` (default `12`).
 
-Flow for a **new** dictionary entry:
+4. Migrate and seed if needed:
 
-1. Choose or create a **category**.
-2. Enter **concept** meanings (English and Nepali).
-3. Enter **words** for search (English and Nepali forms).
-4. Assign a stable **sign id** (slug, e.g. `thank-you`).
-5. Optionally upload **thumbnail** and **video** (see below).
-6. Save as **draft** (not visible in the public app).
+   ```bash
+   npm run db:migrate
+   npm run db:seed
+   ```
 
-Validation:
+5. Start the API: `npm run dev`
+6. Open http://localhost:3000/admin/ and sign in.
 
-- Required: category, both meanings, both words, sign id.
-- Unique: sign id, concept id, words per language where the schema requires it.
-- No duplicate concepts for the same primary English/Nepali pair (business rule TBD).
+Generate a session secret (example):
 
-### Edit sign
-
-Editors can change:
-
-- Category assignment
-- Meanings (English / Nepali)
-- Search words (including future synonyms)
-- Thumbnail and video URLs (or re-upload files)
-- Sign id only with a careful migration path (discouraged once published)
-
-Edits to a **published** sign create a new **draft revision** or mark the row as `pending_review` so the live entry stays unchanged until approval.
-
-### Upload video
-
-Media is stored **outside** the database (object storage or local `data/media/` in development).
-
-Planned flow:
-
-1. Editor selects a sign (draft or published).
-2. Upload MP4 (and optional poster image) via admin UI.
-3. Backend stores the file and writes `video_url` / `thumbnail_url` on the `signs` row.
-4. Optional: record `video_duration_seconds` after processing.
-
-Constraints:
-
-- Format: MP4 (H.264) for Flutter mobile and web.
-- Max file size and resolution limits TBD.
-- Virus/malware scanning out of scope for first version.
-
-Public app already reads `videoUrl`, `thumbnailUrl`, and `videoDurationSeconds` from `GET /signs/:id`.
-
-### Publish / unpublish
-
-Published signs appear in search and category lists. Drafts do not.
-
-**Schema addition (planned):** add to `signs` (or a `sign_publications` table):
-
-- `status`: `draft` | `pending_review` | `published` | `archived`
-- `published_at` (timestamp, nullable)
-- `updated_by` (editor user id, when auth exists)
-
-| Action | Effect on public API |
-|--------|----------------------|
-| **Publish** | Sign included in search/detail/category endpoints |
-| **Unpublish** | Sign hidden; existing links return 404 or “unavailable” |
-| **Archive** | Hidden permanently unless restored by admin |
-
-MVP API today returns all seeded rows; filtering by `status = published` will be added when admin and schema land.
-
-### Review workflow
-
-Simple two-step workflow before publish:
-
-```
-  draft → pending_review → published
-              ↓
-           rejected → draft (with reviewer notes)
+```bash
+openssl rand -base64 32
 ```
 
-1. **Editor** completes the sign form and media, then **Submit for review**.
-2. **Reviewer** opens a queue of `pending_review` items.
-3. Reviewer checks meanings, words, category, and watches the video.
-4. **Approve** → publish (set `published`, set `published_at`).
-5. **Reject** → back to draft with an optional comment for the editor.
+Never commit real passwords or secrets to the repo.
 
-Notifications (email/in-app) are out of scope for v1.
+## Authentication
 
-### Future authentication
+- `POST /admin/login` with `{ "username", "password" }` returns `{ token, expiresAt, username }`.
+- Protected routes expect `Authorization: Bearer <token>`.
+- Invalid or expired tokens receive `401` with code `UNAUTHORIZED`.
+- Tokens are HMAC-signed; verification uses `ADMIN_SESSION_SECRET` only (no database session table).
 
-Admin must not be open to the internet without auth.
+This is a single shared admin account from environment variables, not multi-user auth.
 
-Planned approach (decision deferred):
+## Admin UI
 
-- **Option A:** Email/password or magic link (e.g. Supabase Auth, Auth0, or self-hosted).
-- **Option B:** SSO for an organization (Google Workspace, etc.).
+### Add word
 
-Requirements when implemented:
+Creates category (if new), concept, English/Nepali words, and sign in one transaction.
 
-- All admin routes require a valid session.
-- Role claims: `editor`, `reviewer`, `admin`.
-- Public dictionary routes stay unauthenticated.
-- Secrets only in environment variables, never in the repo.
-- Audit log: who published, edited, or rejected what (table or append-only log).
+| Field | Required | Notes |
+|-------|----------|-------|
+| Sign ID | Yes | URL slug, e.g. `thank-you` |
+| Concept ID | No | Defaults to `concept-<signId>` |
+| English word | Yes | Stored lowercase for search |
+| Nepali word | Yes | |
+| Category | Yes | Name shown in app; id derived from name (e.g. `Food & Drink` → `food-drink`) |
+| English / Nepali meaning | Yes | Shown as sign “meaning” in the app |
+| Video / thumbnail URL | No | Point to hosted media or `http://127.0.0.1:3000/media/…` in dev |
 
-Until auth exists, bulk changes stay in [import scripts](roadmap.md) and controlled DB access.
+Duplicate sign ids are skipped with a message. Conflicts (existing concept id or word already on another concept) return `400`.
 
-## Planned admin API (sketch)
+### Bulk import
 
-Not implemented. Likely prefix: `/admin/…` behind auth.
+Upload `.csv` or `.json`:
+
+- **JSON:** array of objects, same fields as [`data/mock-signs.json`](../data/mock-signs.json).
+- **CSV:** header row required. Canonical columns:
+
+  `id,conceptId,englishWord,nepaliWord,meaningEnglish,meaningNepali,category,videoUrl,thumbnailUrl`
+
+  Snake_case aliases work (`sign_id`, `english_word`, `category_name`, etc.).
+
+The import runs in a single database transaction. If any row fails validation, **nothing** from that upload is committed. Rows that already exist (same sign id) are reported as skipped when the batch succeeds.
+
+Alternative: `POST /admin/signs/bulk` with JSON body `{ "records": [ ... ] }` (same record shape).
+
+## Admin API reference
+
+All paths below except `/admin/login` require a valid Bearer token.
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| POST | `/admin/signs` | Create draft sign (+ concept/words) |
-| PATCH | `/admin/signs/:id` | Update draft or published metadata |
-| POST | `/admin/signs/:id/media` | Upload video/thumbnail |
-| POST | `/admin/signs/:id/submit` | Move to `pending_review` |
-| POST | `/admin/signs/:id/publish` | Approve and publish |
-| POST | `/admin/signs/:id/unpublish` | Remove from public app |
-| POST | `/admin/signs/:id/reject` | Reject with optional note |
-| GET | `/admin/reviews` | List pending items |
+| `POST` | `/admin/login` | Issue session token |
+| `GET` | `/admin/session` | Verify session; returns `{ username }` |
+| `GET` | `/admin/categories` | List categories for the form |
+| `POST` | `/admin/signs` | Create one sign |
+| `POST` | `/admin/signs/bulk` | Bulk import (multipart file or JSON body) |
 
-## UI sketch (future)
+### Create sign body (`POST /admin/signs`)
 
-Single web app (Flutter Web or small React app) used only by staff:
+```json
+{
+  "signId": "thank-you",
+  "conceptId": "concept-thank-you",
+  "englishWord": "thank you",
+  "nepaliWord": "धन्यवाद",
+  "meaningEnglish": "Expression of gratitude.",
+  "meaningNepali": "कृतज्ञता व्यक्त गर्ने शब्द।",
+  "category": "Greetings",
+  "videoUrl": null,
+  "thumbnailUrl": null
+}
+```
 
-- **Dashboard** — counts: drafts, pending review, published.
-- **Sign list** — filter by status/category; search by word.
-- **Sign editor** — form + media upload + preview player (reuse app video component patterns).
-- **Review queue** — side-by-side: proposed vs current (if edit).
+`conceptId` may be omitted to use `concept-<signId>`.
 
-## What we are not building in this step
+Success: `201` with `{ outcome: { status: "inserted", signId } }`, or `200` if sign id already exists (`status: "skipped"`).
 
-- No admin screens in `apps/mobile` (consumer app only).
-- No admin routes in `apps/api` yet.
-- No authentication or role tables yet.
+### Bulk response (`POST /admin/signs/bulk`)
 
-## Interim tools (today)
+```json
+{
+  "result": {
+    "inserted": 2,
+    "skipped": 0,
+    "failed": 0,
+    "outcomes": [ { "status": "inserted", "signId": "..." } ],
+    "errors": []
+  }
+}
+```
+
+If `failed > 0`, the HTTP status is `400` and the transaction was rolled back.
+
+## Data model
+
+Admin writes map to PostgreSQL tables (see [architecture.md](architecture.md)):
+
+| Table | Admin action |
+|-------|----------------|
+| `categories` | Insert on conflict do nothing (by category id from name) |
+| `concepts` | Insert new concept |
+| `words` | Insert `en` and `ne` rows |
+| `signs` | Insert sign with optional media URLs |
+
+Import logic is shared with the CLI: `npm run db:import` uses the same rules as the admin bulk endpoint.
+
+## Code layout
+
+```
+apps/admin/public/     # HTML, CSS, JS (no build step)
+apps/api/src/
+  admin/               # auth + session verification
+  data/sign-import.ts  # record validation
+  data/sign-import-csv.ts
+  repositories/postgres-sign-import.ts
+  routes/admin.ts
+```
+
+## Interim tools (still useful)
 
 | Task | Tool |
 |------|------|
-| Bulk load sample data | `npm run db:seed` |
+| Reset sample data | `npm run db:seed` |
+| Merge JSON without UI | `npm run db:import` |
 | Schema changes | `supabase/migrations/` + `npm run db:migrate` |
-| One-off edits | SQL client on local Postgres |
-| Sample video file | `data/media/` served at `GET /media/…` |
+| Sample MP4 in dev | `data/media/` → `GET /media/<file>.mp4` |
 
-Step 8 in the [roadmap](roadmap.md) adds a JSON import script as the next automation step before a full admin UI.
+## Planned next (not built)
+
+- **Edit sign** — update meanings, words, category, URLs
+- **Media upload** — MP4/poster to storage; API sets `video_url` / `thumbnail_url`
+- **Publish workflow** — `draft` → `pending_review` → `published`; hide drafts from public API
+- **Review queue** — approve / reject with notes
+- **Roles** — editor, reviewer, admin (SSO or hosted auth TBD)
+- **Audit log** — who changed what
+
+Public API today returns all rows in the database; there is no `status` column yet.
 
 ## Open questions
 
 - Multiple synonyms per language per concept?
 - Soft delete vs hard delete for signs?
-- Nepali-only or English-only entries (missing one word)?
-- Who hosts production video (S3, R2, Supabase Storage, CDN)?
+- Nepali-only or English-only entries?
+- Production video host (S3, R2, CDN)?
 
-Resolve these before implementing the admin API and schema changes.
+Resolve these before adding publish workflow and edit flows.
+
+## Related docs
+
+- [README — Admin panel](../README.md#admin-panel)
+- [Architecture](architecture.md)
+- [Deployment — admin env vars](deployment.md#environment-variables-api)
+- [Database setup](database.md)

@@ -131,8 +131,10 @@ Flutter always talks to the API over HTTP, never to the database directly.
 
 The same `supabase/schema.sql` file can run in Supabase SQL editor or any PostgreSQL host. Use a standard `DATABASE_URL` connection string — no Supabase SDK in the API.
 
-## Out of scope
+## Out of scope (database layer)
 
 - Supabase-specific client libraries
-- Auth, RLS policies, admin panel
+- Row-level security and Postgres-backed user accounts (admin auth is API session tokens; see [admin.md](admin.md))
 - Flutter database access
+
+Dictionary writes from staff go through the admin API (`POST /admin/signs`, bulk import), not direct SQL from the app.
