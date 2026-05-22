@@ -169,7 +169,8 @@ apps/api/src/
   admin/               # auth + session verification
   data/sign-import.ts  # record validation
   data/sign-import-csv.ts
-  repositories/postgres-sign-import.ts
+  repositories/drizzle-sign-import.ts
+  db/schema.ts
   routes/admin.ts
 ```
 

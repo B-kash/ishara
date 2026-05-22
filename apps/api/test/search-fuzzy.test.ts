@@ -6,19 +6,17 @@ import {
   levenshteinDistance,
 } from "../src/data/search-fuzzy.js";
 import { scoreBilingualSearch } from "../src/data/sign-search-matching.js";
-import type { SignRecord } from "../src/types/sign-record.js";
+import { buildSignGraphFromFlatInput } from "../src/db/sign-graph.js";
 
-const motherSign: SignRecord = {
-  id: "mother",
+const motherSignGraph = buildSignGraphFromFlatInput({
+  signId: "mother",
   conceptId: "mother-concept",
   englishWord: "mother",
   nepaliWord: "आमा",
   meaningEnglish: "A female parent.",
   meaningNepali: "आमाले जन्माउनुभएको सन्तानको लागि महिला अभिभावक।",
-  category: "Family",
-  videoUrl: null,
-  thumbnailUrl: null,
-};
+  categoryName: "Family",
+});
 
 describe("search-fuzzy", () => {
   test("levenshteinDistance counts edits", () => {
@@ -43,15 +41,15 @@ describe("search-fuzzy", () => {
 
 describe("scoreBilingualSearch", () => {
   test("matches English mother", () => {
-    assert.ok(scoreBilingualSearch(motherSign, "mother") > 0);
+    assert.ok(scoreBilingualSearch(motherSignGraph, "mother") > 0);
   });
 
   test("matches Nepali आमा", () => {
-    assert.ok(scoreBilingualSearch(motherSign, "आमा") > 0);
+    assert.ok(scoreBilingualSearch(motherSignGraph, "आमा") > 0);
   });
 
   test("fuzzy matches mom and motr in English", () => {
-    assert.ok(scoreBilingualSearch(motherSign, "mom") > 0);
-    assert.ok(scoreBilingualSearch(motherSign, "motr") > 0);
+    assert.ok(scoreBilingualSearch(motherSignGraph, "mom") > 0);
+    assert.ok(scoreBilingualSearch(motherSignGraph, "motr") > 0);
   });
 });

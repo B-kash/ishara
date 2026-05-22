@@ -54,7 +54,7 @@ Later we can add `pg_trgm` or full-text search if prefix/substring search needs 
 
 ## Mapping to the API and Flutter app
 
-The API joins four tables into one internal type (`SignRecord`), then maps to JSON for clients. Full diagram and file pointers: **[data-model.md](data-model.md)**.
+The API uses **Drizzle** with one TypeScript type per table (`Category`, `Concept`, `Word`, `Sign`). Related rows are grouped in `SignGraph` for reads. See **[data-model.md](data-model.md)**.
 
 | API response field | Source |
 |------------------|--------|
@@ -65,7 +65,7 @@ The API joins four tables into one internal type (`SignRecord`), then maps to JS
 | `meaning` | `concepts.meaning_english` or `meaning_nepali` by `lang` |
 | `videoUrl` / `thumbnailUrl` | `signs.video_url`, `signs.thumbnail_url` (detail only) |
 
-Join SQL: `apps/api/src/repositories/postgres/postgres-row-mapper.ts`.
+Schema: `apps/api/src/db/schema.ts`. Loads: `apps/api/src/db/load-sign-graphs.ts`.
 
 ## Sample seed data
 

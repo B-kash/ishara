@@ -49,6 +49,8 @@ cp .env.example .env
 
 See [Database plan](docs/database.md) for creating a local `ishara` database.
 
+Dictionary tables are defined in `apps/api/src/db/schema.ts` (Drizzle ORM, synced with `supabase/migrations/`). See [data-model.md](docs/data-model.md).
+
 PostgreSQL setup (after `DATABASE_URL` is in `.env`):
 
 ```bash

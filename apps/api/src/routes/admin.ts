@@ -13,7 +13,7 @@ import {
   unauthorizedErrorResponse,
   validationErrorResponse,
 } from "../errors/api-error.js";
-import { PostgresSignRepository } from "../repositories/postgres-sign-repository.js";
+import { DrizzleSignRepository } from "../repositories/drizzle-sign-repository.js";
 import {
   createSignBodyToImportRecord,
   validateCreateSignRequestBody,
@@ -31,7 +31,7 @@ interface AdminLoginBody {
 function adminRequiresPostgres(
   request: FastifyRequest,
   reply: FastifyReply,
-): PostgresSignRepository | null {
+): DrizzleSignRepository | null {
   if (request.app.dataSource !== "postgres") {
     reply
       .status(503)
@@ -44,8 +44,8 @@ function adminRequiresPostgres(
   }
 
   const signRepository = request.app.signRepository;
-  if (!(signRepository instanceof PostgresSignRepository)) {
-    reply.status(503).send(internalErrorResponse("Postgres repository unavailable."));
+  if (!(signRepository instanceof DrizzleSignRepository)) {
+    reply.status(503).send(internalErrorResponse("Database repository unavailable."));
     return null;
   }
 

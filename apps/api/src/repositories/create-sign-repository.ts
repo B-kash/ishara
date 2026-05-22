@@ -1,6 +1,6 @@
 import type { AppConfig } from "../config/env.js";
+import { DrizzleSignRepository } from "./drizzle-sign-repository.js";
 import { MockSignRepository } from "./mock-sign-repository.js";
-import { PostgresSignRepository } from "./postgres-sign-repository.js";
 import type { SignRepository } from "./sign-repository.js";
 
 export function createSignRepository(config: AppConfig): SignRepository {
@@ -8,5 +8,5 @@ export function createSignRepository(config: AppConfig): SignRepository {
     return new MockSignRepository();
   }
 
-  return new PostgresSignRepository(config.databaseUrl!);
+  return new DrizzleSignRepository(config.databaseUrl!);
 }

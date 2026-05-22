@@ -1,6 +1,7 @@
-import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
+import type { SignGraph } from "../db/sign-graph.js";
 import type { SignBrowsePage } from "../types/sign-browse-page.js";
-import { signRecordMatchesBrowseLetter } from "./browse-letters.js";
+import type { SearchLanguageCode } from "../types/search-language.js";
+import { signGraphMatchesBrowseLetter } from "./browse-letters.js";
 
 export interface BrowsePageQuery {
   cursor?: string;
@@ -10,54 +11,54 @@ export interface BrowsePageQuery {
 }
 
 export function buildSignBrowsePage(
-  signRecords: SignRecord[],
+  signGraphs: SignGraph[],
   limit: number,
 ): SignBrowsePage {
-  const hasMore = signRecords.length > limit;
-  const pageItems = hasMore ? signRecords.slice(0, limit) : signRecords;
+  const hasMore = signGraphs.length > limit;
+  const pageItems = hasMore ? signGraphs.slice(0, limit) : signGraphs;
   const lastItem = pageItems.at(-1);
 
   return {
     items: pageItems,
-    nextCursor: hasMore && lastItem ? lastItem.id : null,
+    nextCursor: hasMore && lastItem ? lastItem.sign.id : null,
     hasMore,
   };
 }
 
-export function filterSignRecordsAfterCursor(
-  sortedSignRecords: SignRecord[],
+export function filterSignGraphsAfterCursor(
+  sortedSignGraphs: SignGraph[],
   cursor: string | undefined,
-): SignRecord[] {
+): SignGraph[] {
   if (!cursor) {
-    return sortedSignRecords;
+    return sortedSignGraphs;
   }
 
-  return sortedSignRecords.filter((signRecord) => signRecord.id > cursor);
+  return sortedSignGraphs.filter((signGraph) => signGraph.sign.id > cursor);
 }
 
-export function prepareBrowseSignRecords(
-  signRecords: SignRecord[],
+export function prepareBrowseSignGraphs(
+  signGraphs: SignGraph[],
   query: BrowsePageQuery,
-): SignRecord[] {
-  const sortedSignRecords = [...signRecords].sort((left, right) =>
-    left.id.localeCompare(right.id),
+): SignGraph[] {
+  const sortedSignGraphs = [...signGraphs].sort((left, right) =>
+    left.sign.id.localeCompare(right.sign.id),
   );
 
-  const letterFilteredSignRecords =
+  const letterFilteredSignGraphs =
     query.letter && query.letterLanguage
-      ? sortedSignRecords.filter((signRecord) =>
-          signRecordMatchesBrowseLetter(
-            signRecord,
+      ? sortedSignGraphs.filter((signGraph) =>
+          signGraphMatchesBrowseLetter(
+            signGraph,
             query.letter!,
             query.letterLanguage!,
           ),
         )
-      : sortedSignRecords;
+      : sortedSignGraphs;
 
-  const cursorFilteredSignRecords = filterSignRecordsAfterCursor(
-    letterFilteredSignRecords,
+  const cursorFilteredSignGraphs = filterSignGraphsAfterCursor(
+    letterFilteredSignGraphs,
     query.cursor,
   );
 
-  return cursorFilteredSignRecords.slice(0, query.limit + 1);
+  return cursorFilteredSignGraphs.slice(0, query.limit + 1);
 }

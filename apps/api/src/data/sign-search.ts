@@ -1,4 +1,4 @@
-import type { SearchLanguageCode } from "../types/sign-record.js";
+import type { SearchLanguageCode } from "../types/search-language.js";
 
 export function parseSearchLanguage(
   languageInput: string | undefined,

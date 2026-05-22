@@ -1,41 +1,32 @@
-import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
+import type { SignGraph } from "../db/sign-graph.js";
+import type { SearchLanguageCode } from "../types/search-language.js";
 import type { SignDetail, SignSearchResult } from "../types/api-responses.js";
 
-function formatEnglishWord(englishWord: string): string {
-  return englishWord.toLowerCase();
-}
-
-function pickMeaning(
-  signRecord: SignRecord,
-  language: SearchLanguageCode,
-): string {
-  return language === "en"
-    ? signRecord.meaningEnglish
-    : signRecord.meaningNepali;
-}
-
 export function toSignSearchResult(
-  signRecord: SignRecord,
+  signGraph: SignGraph,
   language: SearchLanguageCode,
 ): SignSearchResult {
   return {
-    id: signRecord.id,
-    englishWord: formatEnglishWord(signRecord.englishWord),
-    nepaliWord: signRecord.nepaliWord,
-    category: signRecord.category,
-    meaning: pickMeaning(signRecord, language),
+    id: signGraph.sign.id,
+    englishWord: signGraph.englishWord.word,
+    nepaliWord: signGraph.nepaliWord.word,
+    category: signGraph.category.name,
+    meaning:
+      language === "en"
+        ? signGraph.concept.meaningEnglish
+        : signGraph.concept.meaningNepali,
   };
 }
 
-export function toSignDetail(signRecord: SignRecord): SignDetail {
+export function toSignDetail(signGraph: SignGraph): SignDetail {
   return {
-    id: signRecord.id,
-    englishWord: formatEnglishWord(signRecord.englishWord),
-    nepaliWord: signRecord.nepaliWord,
-    category: signRecord.category,
-    meaning: signRecord.meaningEnglish,
-    videoUrl: signRecord.videoUrl,
-    thumbnailUrl: signRecord.thumbnailUrl,
+    id: signGraph.sign.id,
+    englishWord: signGraph.englishWord.word,
+    nepaliWord: signGraph.nepaliWord.word,
+    category: signGraph.category.name,
+    meaning: signGraph.concept.meaningEnglish,
+    videoUrl: signGraph.sign.videoUrl,
+    thumbnailUrl: signGraph.sign.thumbnailUrl,
     videoDurationSeconds: null,
   };
 }

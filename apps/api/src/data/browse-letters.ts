@@ -1,9 +1,9 @@
-import type { SearchLanguageCode } from "../types/sign-record.js";
+import type { SignGraph } from "../db/sign-graph.js";
+import type { SearchLanguageCode } from "../types/search-language.js";
 import {
   normalizeEnglishText,
   normalizeNepaliText,
 } from "./search-normalization.js";
-import type { SignRecord } from "../types/sign-record.js";
 
 export const englishBrowseLetters = "abcdefghijklmnopqrstuvwxyz"
   .split("")
@@ -92,13 +92,15 @@ export function isValidBrowseLetter(
   );
 }
 
-export function signRecordMatchesBrowseLetter(
-  signRecord: SignRecord,
+export function signGraphMatchesBrowseLetter(
+  signGraph: SignGraph,
   letter: string,
   letterLanguage: SearchLanguageCode,
 ): boolean {
   const wordText =
-    letterLanguage === "en" ? signRecord.englishWord : signRecord.nepaliWord;
+    letterLanguage === "en"
+      ? signGraph.englishWord.word
+      : signGraph.nepaliWord.word;
 
   const normalizedWord =
     letterLanguage === "en"

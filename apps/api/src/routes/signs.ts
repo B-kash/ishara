@@ -42,12 +42,12 @@ export async function signRoutes(server: FastifyInstance) {
     }
 
     try {
-      const matchedRecords = await signRepository.searchSignRecords(
+      const matchedGraphs = await signRepository.searchSignGraphs(
         searchQueryResult.value,
       );
       const displayLanguage = detectDisplayLanguage(searchQueryResult.value);
-      const items = matchedRecords.map((signRecord) =>
-        toSignSearchResult(signRecord, displayLanguage),
+      const items = matchedGraphs.map((signGraph) =>
+        toSignSearchResult(signGraph, displayLanguage),
       );
 
       return { items };
@@ -96,15 +96,15 @@ export async function signRoutes(server: FastifyInstance) {
     }
 
     try {
-      const browsePage = await signRepository.listSignRecordsPage({
+      const browsePage = await signRepository.listSignGraphsPage({
         cursor: cursorResult.value,
         limit: limitResult.value,
         letter: letterResult.value?.letter,
         letterLanguage: letterResult.value?.letterLanguage,
       });
 
-      const items = browsePage.items.map((signRecord) =>
-        toSignSearchResult(signRecord, languageResult.value),
+      const items = browsePage.items.map((signGraph) =>
+        toSignSearchResult(signGraph, languageResult.value),
       );
 
       return {
@@ -131,15 +131,15 @@ export async function signRoutes(server: FastifyInstance) {
     }
 
     try {
-      const signRecord = await signRepository.getSignById(signIdResult.value);
+      const signGraph = await signRepository.getSignGraphById(signIdResult.value);
 
-      if (!signRecord) {
+      if (!signGraph) {
         return reply
           .status(404)
           .send(notFoundErrorResponse("Sign not found"));
       }
 
-      return toSignDetail(signRecord);
+      return toSignDetail(signGraph);
     } catch (error) {
       log.error(error);
       return reply.status(503).send(databaseErrorResponse());

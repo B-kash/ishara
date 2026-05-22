@@ -25,7 +25,12 @@ export async function categoryRoutes(server: FastifyInstance) {
 
     try {
       const categories = await signRepository.getAllCategories();
-      return { items: categories };
+      return {
+        items: categories.map((category) => ({
+          id: category.id,
+          name: category.name,
+        })),
+      };
     } catch (error) {
       log.error(error);
       return reply.status(503).send(databaseErrorResponse());
@@ -61,11 +66,11 @@ export async function categoryRoutes(server: FastifyInstance) {
           .send(notFoundErrorResponse("Category not found"));
       }
 
-      const signRecords = await signRepository.getSignRecordsByCategoryId(
+      const signGraphs = await signRepository.getSignGraphsByCategoryId(
         categoryIdResult.value,
       );
-      const items = (signRecords ?? []).map((signRecord) =>
-        toSignSearchResult(signRecord, languageResult.value),
+      const items = (signGraphs ?? []).map((signGraph) =>
+        toSignSearchResult(signGraph, languageResult.value),
       );
 
       return { items };

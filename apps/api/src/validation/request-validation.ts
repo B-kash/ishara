@@ -1,6 +1,6 @@
 import { isValidBrowseLetter } from "../data/browse-letters.js";
 import { parseSearchLanguage } from "../data/sign-search.js";
-import type { SearchLanguageCode } from "../types/sign-record.js";
+import type { SearchLanguageCode } from "../types/search-language.js";
 
 export interface ValidationSuccess<T> {
   ok: true;

@@ -1,8 +1,13 @@
-import type { Category } from "../types/api-responses.js";
+import type { Category } from "../db/schema.js";
+import type { SignGraph } from "../db/sign-graph.js";
 import type { SignBrowsePage } from "../types/sign-browse-page.js";
-import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
+import type { SearchLanguageCode } from "../types/search-language.js";
+import type {
+  BulkSignImportResult,
+  SignImportOutcome,
+} from "../data/sign-import.js";
 
-export interface ListSignRecordsPageOptions {
+export interface ListSignGraphsPageOptions {
   cursor?: string;
   limit: number;
   letter?: string;
@@ -10,16 +15,16 @@ export interface ListSignRecordsPageOptions {
 }
 
 export interface SignRepository {
-  getAllSignRecords(): Promise<SignRecord[]>;
-  listSignRecordsPage(
-    options: ListSignRecordsPageOptions,
-  ): Promise<SignBrowsePage>;
-  getSignById(signId: string): Promise<SignRecord | undefined>;
-  searchSignRecords(searchQuery: string): Promise<SignRecord[]>;
+  getAllSignGraphs(): Promise<SignGraph[]>;
+  listSignGraphsPage(options: ListSignGraphsPageOptions): Promise<SignBrowsePage>;
+  getSignGraphById(signId: string): Promise<SignGraph | undefined>;
+  searchSignGraphs(searchQuery: string): Promise<SignGraph[]>;
   getAllCategories(): Promise<Category[]>;
   getCategoryById(categoryId: string): Promise<Category | undefined>;
-  getSignRecordsByCategoryId(
+  getSignGraphsByCategoryId(
     categoryId: string,
-  ): Promise<SignRecord[] | undefined>;
+  ): Promise<SignGraph[] | undefined>;
+  importSignRecord(rawRecord: unknown): Promise<SignImportOutcome>;
+  bulkImportSignRecords(rawRecords: unknown[]): Promise<BulkSignImportResult>;
   close(): Promise<void>;
 }

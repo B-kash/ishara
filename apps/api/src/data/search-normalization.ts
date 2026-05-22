@@ -1,4 +1,4 @@
-import type { SearchLanguageCode } from "../types/sign-record.js";
+import type { SearchLanguageCode } from "../types/search-language.js";
 
 export function normalizeEnglishText(text: string): string {
   return text.trim().toLowerCase();

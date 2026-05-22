@@ -1,20 +1,26 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Category } from "../types/api-responses.js";
-import { categoryNameToId } from "../data/category-slug.js";
 import {
   buildSignBrowsePage,
-  prepareBrowseSignRecords,
+  prepareBrowseSignGraphs,
 } from "../data/sign-browse-pagination.js";
 import {
-  signRecordMatchesBilingualSearch,
-  sortSignRecordsBySearchScore,
+  signGraphMatchesBilingualSearch,
+  sortSignGraphsBySearchScore,
 } from "../data/sign-search-matching.js";
-import type { SignBrowsePage } from "../types/sign-browse-page.js";
-import type { SignRecord } from "../types/sign-record.js";
 import type {
-  ListSignRecordsPageOptions,
+  BulkSignImportResult,
+  SignImportOutcome,
+} from "../data/sign-import.js";
+import type { Category } from "../db/schema.js";
+import {
+  buildSignGraphFromFlatInput,
+  type SignGraph,
+} from "../db/sign-graph.js";
+import type { SignBrowsePage } from "../types/sign-browse-page.js";
+import type {
+  ListSignGraphsPageOptions,
   SignRepository,
 } from "./sign-repository.js";
 
@@ -24,47 +30,65 @@ const mockSignsFilePath = join(
   "../../../../data/mock-signs.json",
 );
 
-type MockSignRecordJson = Omit<SignRecord, "thumbnailUrl"> & {
+interface MockSignJson {
+  id: string;
+  conceptId: string;
+  englishWord: string;
+  nepaliWord: string;
+  meaningEnglish: string;
+  meaningNepali: string;
+  category: string;
+  videoUrl?: string | null;
   thumbnailUrl?: string | null;
-};
-
-function loadMockSignRecords(): SignRecord[] {
-  const rawRecords = JSON.parse(
-    readFileSync(mockSignsFilePath, "utf8"),
-  ) as MockSignRecordJson[];
-
-  return rawRecords.map((signRecord) => ({
-    ...signRecord,
-    thumbnailUrl: signRecord.thumbnailUrl ?? null,
-  }));
 }
 
-function buildCategoryList(signRecords: SignRecord[]): Category[] {
-  const uniqueNames = [
-    ...new Set(signRecords.map((sign) => sign.category)),
-  ].sort();
+function loadMockSignGraphs(): SignGraph[] {
+  const rawRecords = JSON.parse(
+    readFileSync(mockSignsFilePath, "utf8"),
+  ) as MockSignJson[];
 
-  return uniqueNames.map((categoryName) => ({
-    id: categoryNameToId(categoryName),
-    name: categoryName,
-  }));
+  return rawRecords.map((record) =>
+    buildSignGraphFromFlatInput({
+      signId: record.id,
+      conceptId: record.conceptId,
+      englishWord: record.englishWord,
+      nepaliWord: record.nepaliWord,
+      meaningEnglish: record.meaningEnglish,
+      meaningNepali: record.meaningNepali,
+      categoryName: record.category,
+      videoUrl: record.videoUrl ?? null,
+      thumbnailUrl: record.thumbnailUrl ?? null,
+    }),
+  );
+}
+
+function buildCategoryRows(signGraphs: SignGraph[]): Category[] {
+  const categoriesById = new Map<string, Category>();
+
+  for (const signGraph of signGraphs) {
+    categoriesById.set(signGraph.category.id, signGraph.category);
+  }
+
+  return [...categoriesById.values()].sort((left, right) =>
+    left.name.localeCompare(right.name),
+  );
 }
 
 export class MockSignRepository implements SignRepository {
-  private readonly signRecords: SignRecord[];
+  private readonly signGraphs: SignGraph[];
 
   constructor() {
-    this.signRecords = loadMockSignRecords();
+    this.signGraphs = loadMockSignGraphs();
   }
 
-  async getAllSignRecords(): Promise<SignRecord[]> {
-    return this.signRecords;
+  async getAllSignGraphs(): Promise<SignGraph[]> {
+    return this.signGraphs;
   }
 
-  async listSignRecordsPage(
-    options: ListSignRecordsPageOptions,
+  async listSignGraphsPage(
+    options: ListSignGraphsPageOptions,
   ): Promise<SignBrowsePage> {
-    const candidatePage = prepareBrowseSignRecords(this.signRecords, {
+    const candidatePage = prepareBrowseSignGraphs(this.signGraphs, {
       cursor: options.cursor,
       limit: options.limit,
       letter: options.letter,
@@ -74,36 +98,47 @@ export class MockSignRepository implements SignRepository {
     return buildSignBrowsePage(candidatePage, options.limit);
   }
 
-  async getSignById(signId: string): Promise<SignRecord | undefined> {
-    return this.signRecords.find((sign) => sign.id === signId);
+  async getSignGraphById(signId: string): Promise<SignGraph | undefined> {
+    return this.signGraphs.find((signGraph) => signGraph.sign.id === signId);
   }
 
-  async searchSignRecords(searchQuery: string): Promise<SignRecord[]> {
-    const matchedRecords = this.signRecords.filter((sign) =>
-      signRecordMatchesBilingualSearch(sign, searchQuery),
+  async searchSignGraphs(searchQuery: string): Promise<SignGraph[]> {
+    const matchedGraphs = this.signGraphs.filter((signGraph) =>
+      signGraphMatchesBilingualSearch(signGraph, searchQuery),
     );
 
-    return sortSignRecordsBySearchScore(matchedRecords, searchQuery);
+    return sortSignGraphsBySearchScore(matchedGraphs, searchQuery);
   }
 
   async getAllCategories(): Promise<Category[]> {
-    return buildCategoryList(this.signRecords);
+    return buildCategoryRows(this.signGraphs);
   }
 
   async getCategoryById(categoryId: string): Promise<Category | undefined> {
-    const categories = buildCategoryList(this.signRecords);
-    return categories.find((category) => category.id === categoryId);
+    return buildCategoryRows(this.signGraphs).find(
+      (category) => category.id === categoryId,
+    );
   }
 
-  async getSignRecordsByCategoryId(
+  async getSignGraphsByCategoryId(
     categoryId: string,
-  ): Promise<SignRecord[] | undefined> {
+  ): Promise<SignGraph[] | undefined> {
     const category = await this.getCategoryById(categoryId);
     if (!category) {
       return undefined;
     }
 
-    return this.signRecords.filter((sign) => sign.category === category.name);
+    return this.signGraphs.filter(
+      (signGraph) => signGraph.category.id === categoryId,
+    );
+  }
+
+  async importSignRecord(_rawRecord: unknown): Promise<SignImportOutcome> {
+    throw new Error("Mock data source does not support admin imports.");
+  }
+
+  async bulkImportSignRecords(_rawRecords: unknown[]): Promise<BulkSignImportResult> {
+    throw new Error("Mock data source does not support admin imports.");
   }
 
   async close(): Promise<void> {

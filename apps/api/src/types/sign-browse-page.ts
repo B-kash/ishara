@@ -1,7 +1,7 @@
-import type { SignRecord } from "./sign-record.js";
+import type { SignGraph } from "../db/sign-graph.js";
 
 export interface SignBrowsePage {
-  items: SignRecord[];
+  items: SignGraph[];
   nextCursor: string | null;
   hasMore: boolean;
 }

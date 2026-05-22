@@ -1,4 +1,5 @@
-import type { SearchLanguageCode, SignRecord } from "../types/sign-record.js";
+import type { SignGraph } from "../db/sign-graph.js";
+import type { SearchLanguageCode } from "../types/search-language.js";
 import { fuzzyMatchScore } from "./search-fuzzy.js";
 import {
   normalizeEnglishText,
@@ -9,13 +10,10 @@ import { expandSearchTerms } from "./search-synonyms.js";
 
 const nepaliScriptPattern = /[\u0900-\u097F]/;
 
-function normalizeSignWord(
-  signRecord: SignRecord,
+function normalizeWordText(
+  wordText: string,
   language: SearchLanguageCode,
 ): string {
-  const wordText =
-    language === "en" ? signRecord.englishWord : signRecord.nepaliWord;
-
   if (language === "en") {
     return normalizeEnglishText(wordText);
   }
@@ -57,7 +55,7 @@ export function detectDisplayLanguage(searchQuery: string): SearchLanguageCode {
 }
 
 export function scoreBilingualSearch(
-  signRecord: SignRecord,
+  signGraph: SignGraph,
   searchQuery: string,
 ): number {
   const trimmedQuery = searchQuery.trim();
@@ -65,8 +63,8 @@ export function scoreBilingualSearch(
     return 0;
   }
 
-  const englishWord = normalizeSignWord(signRecord, "en");
-  const nepaliWord = normalizeSignWord(signRecord, "ne");
+  const englishWord = normalizeWordText(signGraph.englishWord.word, "en");
+  const nepaliWord = normalizeWordText(signGraph.nepaliWord.word, "ne");
   const englishTerms = buildSearchTerms(trimmedQuery, "en");
   const nepaliTerms = buildSearchTerms(trimmedQuery, "ne");
 
@@ -85,18 +83,18 @@ export function scoreBilingualSearch(
   return bestScore;
 }
 
-export function signRecordMatchesBilingualSearch(
-  signRecord: SignRecord,
+export function signGraphMatchesBilingualSearch(
+  signGraph: SignGraph,
   searchQuery: string,
 ): boolean {
-  return scoreBilingualSearch(signRecord, searchQuery) > 0;
+  return scoreBilingualSearch(signGraph, searchQuery) > 0;
 }
 
-export function sortSignRecordsBySearchScore(
-  signRecords: SignRecord[],
+export function sortSignGraphsBySearchScore(
+  signGraphs: SignGraph[],
   searchQuery: string,
-): SignRecord[] {
-  return [...signRecords].sort(
+): SignGraph[] {
+  return [...signGraphs].sort(
     (left, right) =>
       scoreBilingualSearch(right, searchQuery) -
       scoreBilingualSearch(left, searchQuery),

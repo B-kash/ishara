@@ -45,7 +45,7 @@ Admin writes require `DATA_SOURCE=postgres`. The consumer app does not include a
 - **Word** — searchable label per language (`en` / `ne`) linked to a concept
 - **Sign** — stable id, video/thumbnail URLs, links 1:1 to a concept
 
-Schema: `supabase/migrations/`. Table-to-type mapping: [data-model.md](data-model.md). Setup: [database.md](database.md).
+Schema: `supabase/migrations/` + Drizzle `apps/api/src/db/schema.ts`. Mapping: [data-model.md](data-model.md). Setup: [database.md](database.md).
 
 ## Mock data (development)
 

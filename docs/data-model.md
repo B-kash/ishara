@@ -1,10 +1,17 @@
 # Data model — database to API to app
 
-How PostgreSQL tables relate to TypeScript types and Flutter models.
+PostgreSQL tables are defined in code with **Drizzle ORM**. TypeScript types are inferred from the schema — no separate hand-written row types.
 
-## Tables (what `npm run db:migrate` creates)
+## Source of truth
 
-Defined in [`supabase/migrations/001_initial_schema.sql`](../supabase/migrations/001_initial_schema.sql).
+| What | Where |
+|------|--------|
+| Table DDL (applied to Postgres) | [`supabase/migrations/001_initial_schema.sql`](../supabase/migrations/001_initial_schema.sql) |
+| Same tables in TypeScript | [`apps/api/src/db/schema.ts`](../apps/api/src/db/schema.ts) |
+| Foreign keys / relations | [`apps/api/src/db/relations.ts`](../apps/api/src/db/relations.ts) |
+
+Run migrations: `npm run db:migrate` (existing script).  
+Optional Drizzle tooling: `npm run drizzle:generate` / `npm run drizzle:studio` from `apps/api`.
 
 ```mermaid
 erDiagram
@@ -15,6 +22,8 @@ erDiagram
   categories {
     text id PK
     text name
+    timestamptz created_at
+    timestamptz updated_at
   }
   concepts {
     text id PK
@@ -25,7 +34,7 @@ erDiagram
   words {
     uuid id PK
     text concept_id FK
-    text language "en or ne"
+    text language
     text word
   }
   signs {
@@ -36,143 +45,82 @@ erDiagram
   }
 ```
 
-| Table | One row means | Example |
-|-------|----------------|---------|
-| `categories` | A browse group | `id=family`, `name=Family` |
-| `concepts` | One dictionary meaning | `id=concept-mother`, meanings in EN/NE |
-| `words` | Searchable label in one language | `en` → `mother`, `ne` → `आमा` |
-| `signs` | NSL video entry for that concept | `id=mother`, URLs for video/thumb |
+## Table types in code (= database rows)
 
-Rules:
+From `schema.ts`:
 
-- Each **concept** has at most one English and one Nepali **word** (`unique (concept_id, language)`).
-- Each **concept** has exactly one **sign** (`signs.concept_id` is unique).
-- **`signs.id`** is the public slug the app uses (`hello`, `mother`) — not the concept id.
-
-## Why the API does not expose four tables
-
-Routes work with a single joined row per sign. The join lives in one place:
-
-[`apps/api/src/repositories/postgres/postgres-row-mapper.ts`](../apps/api/src/repositories/postgres/postgres-row-mapper.ts) — `signRecordSelectSql` + `mapRowToSignRecord`.
-
-```sql
--- Simplified: every read loads this shape
-SELECT
-  signs.id,
-  concepts.id AS concept_id,
-  english_words.word AS english_word,
-  nepali_words.word AS nepali_word,
-  concepts.meaning_english,
-  concepts.meaning_nepali,
-  categories.name AS category,
-  signs.video_url,
-  signs.thumbnail_url
-FROM signs
-JOIN concepts ...
-JOIN categories ...
-JOIN words english_words ... language = 'en'
-JOIN words nepali_words ... language = 'ne'
+```ts
+export type Category = typeof categories.$inferSelect;
+export type Concept = typeof concepts.$inferSelect;
+export type Word = typeof words.$inferSelect;
+export type Sign = typeof signs.$inferSelect;
 ```
 
-## Type layers (API codebase)
+Each field maps to a column (`categoryId` → `category_id`). Inserts use `$inferInsert` (`NewCategory`, etc.).
 
-```text
-PostgreSQL (4 tables)
-       │  signRecordSelectSql + mapRowToSignRecord
-       ▼
-SignRecord          ← internal; used in repositories & search
-       │  toSignSearchResult / toSignDetail
-       ▼
-SignSearchResult    ← JSON for search, browse, category lists
-SignDetail          ← JSON for GET /signs/:id
-       │  HTTP
-       ▼
-Flutter models      ← SignSearchResult, SignDetail in apps/mobile
+There is **no** flattened `SignRecord` type. If you need several tables together, use `SignGraph` (below).
+
+## SignGraph (not a table)
+
+[`apps/api/src/db/sign-graph.ts`](../apps/api/src/db/sign-graph.ts):
+
+```ts
+export interface SignGraph {
+  sign: Sign;
+  concept: Concept;
+  category: Category;
+  englishWord: Word;
+  nepaliWord: Word;
+}
 ```
 
-| Layer | File | Purpose |
-|-------|------|---------|
-| DB row shape | `postgres-row-mapper.ts` → `SignRecordRow` | Snake_case columns from SQL |
-| App-internal | `types/sign-record.ts` → `SignRecord` | CamelCase; one object per sign |
-| HTTP JSON | `types/api-responses.ts` | What clients receive |
-| Mappers | `mappers/sign-response.ts` | `lang` picks one `meaning`; detail uses English meaning today |
+This only **groups** rows that already exist in four tables. Used for search, browse, and mock loading. HTTP responses still use `SignSearchResult` / `SignDetail` — built explicitly in [`sign-response.ts`](../apps/api/src/mappers/sign-response.ts) from `SignGraph` fields.
 
-### `SignRecord` (repository layer)
+## Reading data (Drizzle)
 
-[`apps/api/src/types/sign-record.ts`](../apps/api/src/types/sign-record.ts)
+[`apps/api/src/db/load-sign-graphs.ts`](../apps/api/src/db/load-sign-graphs.ts):
 
-| Field | DB source |
-|-------|-----------|
-| `id` | `signs.id` |
-| `conceptId` | `concepts.id` |
-| `englishWord` | `words.word` (`language = 'en'`) |
-| `nepaliWord` | `words.word` (`language = 'ne'`) |
-| `meaningEnglish` | `concepts.meaning_english` |
-| `meaningNepali` | `concepts.meaning_nepali` |
-| `category` | `categories.name` |
-| `videoUrl` | `signs.video_url` |
-| `thumbnailUrl` | `signs.thumbnail_url` |
+```ts
+await database.query.signs.findMany({
+  with: {
+    concept: {
+      with: { category: true, words: true },
+    },
+  },
+});
+```
 
-You will not see `SignRecord` in HTTP responses. It exists so routes and search logic do not repeat the join.
+[`signGraphFromQueryRow`](../apps/api/src/db/sign-graph.ts) splits the nested result into separate `Sign`, `Concept`, `Category`, and `Word` objects.
 
-### `SignSearchResult` (list/search JSON)
+Repository: [`drizzle-sign-repository.ts`](../apps/api/src/repositories/drizzle-sign-repository.ts).
 
-| Field | From `SignRecord` |
-|-------|-------------------|
-| `id` | `id` |
-| `englishWord` | lowercased `englishWord` |
-| `nepaliWord` | `nepaliWord` |
-| `category` | `category` |
-| `meaning` | `meaningEnglish` or `meaningNepali` if `lang=ne` |
+## Writing data (Drizzle)
 
-`conceptId`, both meanings, and media URLs are omitted from list responses to keep payloads small.
+[`drizzle-sign-import.ts`](../apps/api/src/repositories/drizzle-sign-import.ts) inserts into `categories`, `concepts`, `words`, and `signs` with `database.insert(...)`.
 
-### `SignDetail` (detail JSON)
+Admin routes and `npm run db:import` use the same validation in [`sign-import.ts`](../apps/api/src/data/sign-import.ts).
 
-Includes `videoUrl`, `thumbnailUrl`; `meaning` is English only for now (`toSignDetail`).
+## Mock mode
 
-## Mock mode (no database)
+[`data/mock-signs.json`](../data/mock-signs.json) stays flat for editors. [`buildSignGraphFromFlatInput`](../apps/api/src/db/sign-graph.ts) turns each JSON object into proper `Category`, `Concept`, `Word`, and `Sign` rows in memory.
 
-[`data/mock-signs.json`](../data/mock-signs.json) is already a **flat** `SignRecord`-shaped list. `MockSignRepository` loads it directly — no SQL, no joins.
+## HTTP JSON (unchanged contract)
 
-Same field names as `SignRecord` so search and routes behave the same whether `DATA_SOURCE=mock` or `postgres`.
-
-## Writes (admin / import)
-
-One UI/JSON row still maps to **four inserts**:
-
-| Input field (JSON/admin) | Table.column |
-|--------------------------|--------------|
-| `category` (name) | `categories.name` + `categories.id` from slug |
-| `conceptId` | `concepts.id` |
-| `meaningEnglish` / `meaningNepali` | `concepts.meaning_*` |
-| `englishWord` / `nepaliWord` | `words` (`en` / `ne`) |
-| `id` (sign id) | `signs.id` |
-| `videoUrl` / `thumbnailUrl` | `signs.video_url`, `signs.thumbnail_url` |
-
-See [`postgres-sign-import.ts`](../apps/api/src/repositories/postgres-sign-import.ts).
-
-## Flutter app
-
-| API JSON | Dart model | File |
-|----------|------------|------|
-| `SignSearchResult` | `SignSearchResult` | `apps/mobile/lib/models/sign_search_result.dart` |
-| `SignDetail` | `SignDetail` | `apps/mobile/lib/models/sign_detail.dart` |
-| `Category` | `Category` | `apps/mobile/lib/models/category.dart` |
-
-Flutter never sees `SignRecord` or SQL table names.
-
-## Where to look in code
-
-| Question | Start here |
+| API type | Built from |
 |----------|------------|
-| What tables exist? | `supabase/migrations/001_initial_schema.sql` |
-| How are they joined for reads? | `postgres-row-mapper.ts` → `signRecordSelectSql` |
-| How does search use words? | `sign-search-matching.ts` on `SignRecord[]` |
-| What does the client get? | `sign-response.ts`, `routes/signs.ts` |
-| How is a new sign saved? | `postgres-sign-import.ts`, `routes/admin.ts` |
+| `SignSearchResult` | `signGraph.sign`, `.englishWord`, `.nepaliWord`, `.category.name`, `.concept.meaning*` |
+| `SignDetail` | above + `sign.videoUrl`, `sign.thumbnailUrl` |
+| `Category` (list) | `category.id`, `category.name` only |
 
-## Related docs
+Flutter models match these JSON shapes.
 
-- [database.md](database.md) — migrations, seeds, local setup
-- [architecture.md](architecture.md) — app boundaries
+## Where to look
+
+| Question | File |
+|----------|------|
+| Table definitions | `apps/api/src/db/schema.ts` |
+| Relations | `apps/api/src/db/relations.ts` |
+| DB connection | `apps/api/src/db/client.ts` |
+| Load signs with relations | `apps/api/src/db/load-sign-graphs.ts` |
+| Repository interface | `apps/api/src/repositories/sign-repository.ts` |
+| Public route mapping | `apps/api/src/mappers/sign-response.ts` |
